@@ -14,6 +14,7 @@ export function RegisterForm() {
     email: '',
     password: '',
     name: '',
+    role: 'CLIENT' as const, // Force client role for registration
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,7 +24,7 @@ export function RegisterForm() {
     
     try {
       await register(formData);
-      toast.success('Successfully registered! Redirecting to dashboard...');
+      toast.success('Successfully registered! Redirecting to login...');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to register');
     } finally {
@@ -71,7 +72,7 @@ export function RegisterForm() {
                 Creating account...
               </div>
             ) : (
-              'Create Account'
+              'Create Client Account'
             )}
           </Button>
         </form>

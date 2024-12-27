@@ -1,20 +1,21 @@
 // prisma/seed.ts
 
-import { PrismaClient, Prisma } from '@prisma/client'
-import bcrypt from 'bcrypt'
+import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
   // Delete existing data in the correct order
   await prisma.session.deleteMany()
+  await prisma.report.deleteMany()
   await prisma.profile.deleteMany()
   await prisma.user.deleteMany()
   await prisma.permission.deleteMany()
   await prisma.role.deleteMany()
   await prisma.widget.deleteMany()
 
-  // Buat permissions
+  // Create permissions
   const readPermission = await prisma.permission.create({
     data: { name: 'READ' },
   })
@@ -28,7 +29,7 @@ async function main() {
     data: { name: 'UPDATE' },
   })
 
-  // Buat roles dan hubungkan dengan permissions
+  // Create roles with permissions
   const adminRole = await prisma.role.create({
     data: {
       name: 'ADMIN',
@@ -43,98 +44,161 @@ async function main() {
     },
   })
 
-  const userRole = await prisma.role.create({
+  const managerRole = await prisma.role.create({
     data: {
-      name: 'USER',
-      permissions: {
-        connect: [{ id: readPermission.id }, { id: writePermission.id }],
-      },
-    },
-  })
-
-  const moderatorRole = await prisma.role.create({
-    data: {
-      name: 'MODERATOR',
+      name: 'MANAGER',
       permissions: {
         connect: [
           { id: readPermission.id },
+          { id: writePermission.id },
           { id: updatePermission.id },
         ],
       },
     },
   })
 
-  // Buat pengguna
-  const hashedPasswordAdmin = await bcrypt.hash('adminpassword', 10)
+  const staffRole = await prisma.role.create({
+    data: {
+      name: 'STAFF',
+      permissions: {
+        connect: [
+          { id: readPermission.id },
+          { id: writePermission.id },
+        ],
+      },
+    },
+  })
+
+  const clientRole = await prisma.role.create({
+    data: {
+      name: 'CLIENT',
+      permissions: {
+        connect: [
+          { id: readPermission.id },
+        ],
+      },
+    },
+  })
+
+  // Create users with hierarchy
   const adminUser = await prisma.user.create({
     data: {
       email: 'admin@example.com',
       name: 'Admin User',
-      password: hashedPasswordAdmin,
-      roleId: adminRole.id,
+      password: await bcrypt.hash('admin123', 10),
+      role: {
+        connect: { id: adminRole.id },
+      },
       profile: {
         create: {
-          bio: 'I am the admin',
+          bio: 'System Administrator',
           avatarUrl: 'https://example.com/avatar/admin.png',
         },
       },
     },
   })
 
-  const hashedPasswordUser = await bcrypt.hash('userpassword', 10)
-  const normalUser = await prisma.user.create({
+  const managerUser = await prisma.user.create({
     data: {
-      email: 'user@example.com',
-      name: 'Normal User',
-      password: hashedPasswordUser,
-      roleId: userRole.id,
+      email: 'manager@example.com',
+      name: 'Manager User',
+      password: await bcrypt.hash('manager123', 10),
+      role: {
+        connect: { id: managerRole.id },
+      },
       profile: {
         create: {
-          bio: 'I am a regular user',
-          avatarUrl: 'https://example.com/avatar/user.png',
+          bio: 'Department Manager',
+          avatarUrl: 'https://example.com/avatar/manager.png',
         },
       },
     },
   })
 
-  // Buat sesi (contoh)
-  await prisma.session.create({
+  const staffUser = await prisma.user.create({
     data: {
-      sessionId: 'session123',
-      userId: adminUser.id,
-      expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 jam dari sekarang
+      email: 'staff@example.com',
+      name: 'Staff User',
+      password: await bcrypt.hash('staff123', 10),
+      role: {
+        connect: { id: staffRole.id },
+      },
+      profile: {
+        create: {
+          bio: 'Staff Member',
+          avatarUrl: 'https://example.com/avatar/staff.png',
+        },
+      },
     },
   })
 
-  // Buat widgets
+  const clientUser = await prisma.user.create({
+    data: {
+      email: 'client@example.com',
+      name: 'Client User',
+      password: await bcrypt.hash('client123', 10),
+      role: {
+        connect: { id: clientRole.id },
+      },
+      profile: {
+        create: {
+          bio: 'Client',
+          avatarUrl: 'https://example.com/avatar/client.png',
+        },
+      },
+    },
+  })
+
+  // Create sample reports
+  await prisma.report.create({
+    data: {
+      title: 'Monthly Progress Report',
+      content: 'Detailed analysis of monthly progress...',
+      status: 'PENDING',
+      createdBy: { connect: { id: staffUser.id } },
+      assignedTo: { connect: { id: managerUser.id } },
+    },
+  })
+
+  await prisma.report.create({
+    data: {
+      title: 'Client Requirements',
+      content: 'New client project requirements...',
+      status: 'IN_PROGRESS',
+      createdBy: { connect: { id: clientUser.id } },
+      assignedTo: { connect: { id: staffUser.id } },
+    },
+  })
+
+  // Create widgets
   await prisma.widget.createMany({
     data: [
       {
         name: 'Weather Widget',
         type: 'WEATHER',
-        configuration: {
+        configuration: JSON.stringify({
           location: 'Jakarta',
           units: 'metric',
-        },
+        }),
       },
       {
         name: 'News Widget',
         type: 'NEWS',
-        configuration: {
+        configuration: JSON.stringify({
           category: 'technology',
-        },
+        }),
       },
       {
         name: 'Stocks Widget',
         type: 'STOCKS',
-        configuration: {
+        configuration: JSON.stringify({
           market: 'NYSE',
-        },
+        }),
       },
     ],
   })
 
-  console.log('Database telah di-seed dengan data awal yang diperbarui.')
+  console.log('Database seeded successfully with updated roles and permissions.')
 }
 
 main()
