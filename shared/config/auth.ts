@@ -1,9 +1,9 @@
 import { AuthOptions } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { prisma } from './database';
-import { validatePassword } from '../lib/validation/userValidation';
+import { authenticateUser } from 'slices/auth/services/authService';
 
-export const authConfig: AuthOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -13,45 +13,59 @@ export const authConfig: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log("Missing credentials");
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
-        });
+        try {
+          const user = await authenticateUser(credentials.email, credentials.password);
 
-        if (!user) {
+          if (!user) {
+            console.log("Authentication failed");
+            return null;
+          }
+
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            name: user.name || undefined,
+            role: user.role.name,
+          };
+        } catch (error) {
+          console.error("Auth error:", error);
           return null;
         }
-
-        // In production, implement proper password validation
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        };
       }
     })
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        return {
+          ...token,
+          id: user.id,
+          role: user.role,
+        } as JWT;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id as string,
+          role: token.role as string,
+        }
+      };
+    }
+  },
   pages: {
     signIn: '/login',
   },
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.user.role = token.role;
-      }
-      return session;
-    }
-  }
+  secret: process.env.NEXTAUTH_SECRET,
 };

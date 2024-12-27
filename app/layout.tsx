@@ -1,9 +1,13 @@
 import { Inter } from 'next/font/google';
-import { Toaster } from 'shared/components/ui/sonner';
-import { ThemeProvider } from '@/shared/components/layout/theme-provider';
+import { Providers } from './providers';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
+
+export const metadata = {
+  title: 'Next.js Template',
+  description: 'Next.js template with authentication and dashboard',
+};
 
 export default function RootLayout({
   children,
@@ -13,15 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Providers>
           {children}
-          <Toaster />
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

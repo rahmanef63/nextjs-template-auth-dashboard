@@ -1,64 +1,70 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from 'shared/components/ui/button';
-import { Input } from 'shared/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from 'shared/components/ui/card';
+import { RegisterForm } from 'slices/auth/components/RegisterForm';
 import { useAuth } from 'shared/hooks/useAuth';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { ROUTES } from 'shared/constants/routes';
 
 export default function RegisterPage() {
+  const { user, loading } = useAuth();
   const router = useRouter();
-  const { register } = useAuth();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const success = await register(formData);
-    if (success) {
-      router.push('/dashboard');
+  useEffect(() => {
+    if (user && !loading) {
+      router.push(ROUTES.dashboard.root);
     }
-  };
+  }, [user, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Card className="w-[400px]">
-        <CardHeader>
-          <CardTitle>Register</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              placeholder="Name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-            <Input
-              type="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            />
-            <Button type="submit" className="w-full">Register</Button>
-          </form>
-        </CardContent>
-        <CardFooter className="justify-center">
-          <Link href="/login" className="text-sm text-muted-foreground hover:text-primary">
-            Already have an account? Login
-          </Link>
-        </CardFooter>
-      </Card>
+    <div className="container relative h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+      <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
+        <div className="absolute inset-0 bg-zinc-900" />
+        <div className="relative z-20 flex items-center text-lg font-medium">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mr-2 h-6 w-6"
+          >
+            <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
+          </svg>
+          Acme Inc
+        </div>
+        <div className="relative z-20 mt-auto">
+          <blockquote className="space-y-2">
+            <p className="text-lg">
+              &ldquo;This library has saved me countless hours of work and helped me deliver stunning designs to my clients faster than ever before.&rdquo;
+            </p>
+            <footer className="text-sm">Sofia Davis</footer>
+          </blockquote>
+        </div>
+      </div>
+      <div className="lg:p-8">
+        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+          <div className="flex flex-col space-y-2 text-center">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Create an account
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Enter your details below to create your account
+            </p>
+          </div>
+          <RegisterForm />
+        </div>
+      </div>
     </div>
   );
 }

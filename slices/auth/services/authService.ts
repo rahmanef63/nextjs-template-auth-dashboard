@@ -2,7 +2,13 @@
 
 import prisma from 'shared/lib/prisma'
 import bcrypt from 'bcrypt'
-import type { User } from '.prisma/client'
+import type { User } from '@prisma/client'
+
+export type AuthenticatedUser = User & {
+  role: {
+    name: string;
+  };
+};
 
 export async function registerUser(email: string, name: string, password: string): Promise<User> {
   const hashedPassword = await bcrypt.hash(password, 10)
@@ -25,15 +31,20 @@ export async function registerUser(email: string, name: string, password: string
   return user
 }
 
-export async function authenticateUser(email: string, password: string): Promise<(User & { role: { name: string } }) | null> {
+export async function authenticateUser(email: string, password: string): Promise<AuthenticatedUser | null> {
   const user = await prisma.user.findUnique({
     where: { email },
-    include: { role: true },
-  })
+    include: { role: true }
+  });
 
-  if (user && (await bcrypt.compare(password, user.password))) {
-    return user
+  if (!user) {
+    return null;
   }
 
-  return null
+  const isValidPassword = await bcrypt.compare(password, user.password);
+  if (!isValidPassword) {
+    return null;
+  }
+
+  return user;
 }

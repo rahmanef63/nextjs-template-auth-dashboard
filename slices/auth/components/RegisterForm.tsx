@@ -1,64 +1,87 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useAuth } from 'shared/hooks/useAuth';
 import { Button } from 'shared/components/ui/button';
 import { Input } from 'shared/components/ui/input';
-import { useAuth } from 'shared/hooks/useAuth';
-import { toast } from 'sonner';
+import { Card, CardContent } from 'shared/components/ui/card';
+import { toast } from 'react-hot-toast';
+import Link from 'next/link';
 
 export function RegisterForm() {
-  const router = useRouter();
   const { register } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     name: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
     try {
-      const success = await register(formData);
-      if (success) {
-        router.push('/dashboard');
-      } else {
-        toast.error('Registration failed');
-      }
+      await register(formData);
+      toast.success('Successfully registered! Redirecting to dashboard...');
     } catch (error) {
-      toast.error('Registration failed');
+      toast.error(error instanceof Error ? error.message : 'Failed to register');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <Input
-        placeholder="Name"
-        value={formData.name}
-        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-        disabled={isLoading}
-      />
-      <Input
-        type="email"
-        placeholder="Email"
-        value={formData.email}
-        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-        disabled={isLoading}
-      />
-      <Input
-        type="password"
-        placeholder="Password"
-        value={formData.password}
-        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-        disabled={isLoading}
-      />
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Creating account...' : 'Register'}
-      </Button>
-    </form>
+    <Card>
+      <CardContent className="pt-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Input
+              placeholder="Your name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              disabled={isLoading}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Input
+              type="email"
+              placeholder="name@example.com"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              disabled={isLoading}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Input
+              type="password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              disabled={isLoading}
+              required
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Creating account...
+              </div>
+            ) : (
+              'Create Account'
+            )}
+          </Button>
+        </form>
+        <div className="mt-4 text-center text-sm">
+          Already have an account?{' '}
+          <Link href="/login" className="text-primary hover:underline">
+            Sign in
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
