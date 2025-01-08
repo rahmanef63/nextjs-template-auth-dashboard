@@ -1,6 +1,6 @@
 'use client';
 
-import { RegisterForm } from 'slices/auth/components/RegisterForm';
+import { RegisterForm } from 'shared/auth/components/RegisterForm';
 import { useAuth } from 'shared/hooks/useAuth';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';

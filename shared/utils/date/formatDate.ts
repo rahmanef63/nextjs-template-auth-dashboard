@@ -18,3 +18,4 @@ export function formatTimeAgo(date: Date | string): string {
 export function formatRelativeTime(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   return formatRelative(dateObj, new Date());
+}

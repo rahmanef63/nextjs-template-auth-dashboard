@@ -1,25 +1,24 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from 'shared/lib/prisma';
 import { rolePermissions } from 'shared/lib/rbac/permissions';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userRole = session.user.role;
-    if (!rolePermissions[userRole].includes('users:read')) {
+    const userRole = session.user.role.name.toUpperCase();
+    if (!rolePermissions[userRole]?.includes('users:read')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    const id = request.nextUrl.pathname.split('/')[3];
+
     const user = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: {
         id: true,
         email: true,

@@ -1,6 +1,6 @@
 'use client';
 
-import { ThemeProvider } from '@/shared/components/layout/theme-provider';
+import { ThemeProvider } from 'shared/components/layout/theme-provider';
 
 export default function PublicLayout({
   children,

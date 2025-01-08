@@ -6,7 +6,8 @@ class ApiClient {
   private baseUrl: string;
 
   private constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+    // Base URL is not needed for relative paths
+    this.baseUrl = '';
   }
 
   public static getInstance(): ApiClient {
@@ -21,7 +22,7 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      const response = await fetch(endpoint, {
         ...options,
         headers: {
           'Content-Type': 'application/json',

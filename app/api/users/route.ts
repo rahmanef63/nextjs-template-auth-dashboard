@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from 'shared/lib/prisma';
 import { rolePermissions } from 'shared/lib/rbac/permissions';
@@ -16,37 +16,41 @@ const getUserSchema = z.object({
   search: z.string().optional(),
 });
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userRole = session.user.role;
-    if (!rolePermissions[userRole].includes('users:read')) {
+    const userRole = session.user.role.name.toUpperCase();
+    if (!rolePermissions[userRole]?.includes('users:read')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const params = getUserSchema.parse(searchParams);
+    const { searchParams } = request.nextUrl;
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const search = searchParams.get('search') || '';
+    const role = searchParams.get('role');
 
     const where = {
-      ...(params.role && { role: params.role }),
-      ...(params.search && {
+      ...(search && {
         OR: [
-          { name: { contains: params.search, mode: 'insensitive' } },
-          { email: { contains: params.search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+          { name: { contains: search, mode: 'insensitive' } },
         ],
+      }),
+      ...(role && {
+        role: {
+          name: role,
+        },
       }),
     };
 
     const [users, total] = await Promise.all([
       prisma.user.findMany({
         where,
-        skip: (params.page - 1) * params.limit,
-        take: params.limit,
-        orderBy: { createdAt: 'desc' },
         select: {
           id: true,
           email: true,
@@ -55,18 +59,21 @@ export async function GET(request: Request) {
           createdAt: true,
           updatedAt: true,
         },
+        skip: (page - 1) * limit,
+        take: limit,
       }),
       prisma.user.count({ where }),
     ]);
 
+    const totalPages = Math.ceil(total / limit);
+
     return NextResponse.json({
       users,
       total,
-      page: params.page,
-      totalPages: Math.ceil(total / params.limit),
+      page,
+      totalPages,
     });
   } catch (error) {
-    console.error('Error fetching users:', error);
     return NextResponse.json(
       { error: 'Failed to fetch users' },
       { status: 500 }

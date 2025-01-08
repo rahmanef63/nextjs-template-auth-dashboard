@@ -19,15 +19,42 @@ export async function GET() {
       })
     ]);
 
-    return NextResponse.json({
+    // Generate sample data for charts
+    const userGrowth = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      return {
+        date: date.toISOString().split('T')[0],
+        value: Math.floor(Math.random() * 100) + totalUsers - (6 - i) * 10,
+      };
+    });
+
+    const activityOverview = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      return {
+        date: date.toISOString().split('T')[0],
+        value: Math.floor(Math.random() * 1000),
+      };
+    });
+
+    const data = {
       totalUsers,
       activeUsers,
       newUsers,
-      systemStatus: 'active'
+      systemStatus: 'active' as const,
+      userGrowth,
+      activityOverview,
+    };
+
+    return NextResponse.json({
+      success: true,
+      data
     });
   } catch (error) {
+    console.error('Failed to fetch dashboard stats:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch dashboard stats' },
+      { success: false, error: 'Failed to fetch dashboard stats' },
       { status: 500 }
     );
   }

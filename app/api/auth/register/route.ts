@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from 'shared/lib/prisma';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request: Request) {
   try {
@@ -16,17 +17,44 @@ export async function POST(request: Request) {
       );
     }
 
-    // In production, hash the password before saving
+    // First, get the default user role
+    const userRole = await prisma.role.findFirst({
+      where: { name: 'USER' },
+    });
+
+    if (!userRole) {
+      return NextResponse.json(
+        { error: 'Default role not found' },
+        { status: 500 }
+      );
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create the user with the role relationship
     const user = await prisma.user.create({
       data: {
         email,
         name,
-        role: 'USER',
+        password: hashedPassword,
+        role: {
+          connect: {
+            id: userRole.id,
+          },
+        },
+      },
+      include: {
+        role: true,
       },
     });
 
-    return NextResponse.json({ user }, { status: 201 });
+    // Don't send the password back in the response
+    const { password: _, ...userWithoutPassword } = user;
+
+    return NextResponse.json({ user: userWithoutPassword }, { status: 201 });
   } catch (error) {
+    console.error('Registration error:', error);
     return NextResponse.json(
       { error: 'Registration failed' },
       { status: 500 }

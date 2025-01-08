@@ -1,6 +1,6 @@
 import { apiClient } from 'shared/lib/apiClient';
 import { logger } from 'shared/lib/logger';
-import type { ExportOptions, ExportResult } from 'shared/types/export';
+import type { ExportOptions, ExportResult } from '@/shared/types/export';
 
 export class ExportService {
   private static instance: ExportService;

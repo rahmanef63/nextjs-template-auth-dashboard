@@ -5,9 +5,8 @@ import { useUsers } from '../hooks/useUsers';
 import { UserFilters } from '../types';
 import { Input } from 'shared/components/ui/input';
 import { Button } from 'shared/components/ui/button';
-import { Select } from 'shared/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { Table, TableHeader, TableRow, TableCell, TableBody } from 'shared/components/ui/table';
-import { PermissionGuard } from 'shared/components/auth/PermissionGuard';
 
 export function UserList() {
   const [filters, setFilters] = useState<UserFilters>({
@@ -37,15 +36,17 @@ export function UserList() {
           onChange={(e) => handleSearch(e.target.value)}
           className="max-w-sm"
         />
-        <Select
-          onValueChange={handleRoleFilter}
-          options={[
-            { label: 'All Roles', value: '' },
-            { label: 'Admin', value: 'ADMIN' },
-            { label: 'Manager', value: 'MANAGER' },
-            { label: 'Staff', value: 'STAFF' },
-          ]}
-        />
+        <Select onValueChange={handleRoleFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Roles</SelectItem>
+            <SelectItem value="ADMIN">Admin</SelectItem>
+            <SelectItem value="MANAGER">Manager</SelectItem>
+            <SelectItem value="STAFF">Staff</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Table>
@@ -66,11 +67,9 @@ export function UserList() {
               <TableCell>{user.role}</TableCell>
               <TableCell>{user.status}</TableCell>
               <TableCell>
-                <PermissionGuard permission="users:write">
-                  <Button variant="ghost" size="sm">
-                    Edit
-                  </Button>
-                </PermissionGuard>
+                <Button variant="ghost" size="sm">
+                  Edit
+                </Button>
               </TableCell>
             </TableRow>
           ))}

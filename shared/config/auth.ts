@@ -1,6 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { authenticateUser } from 'slices/auth/services/authService';
+import { authenticateUser } from 'shared/auth/services/authService';
+import { RoleType } from 'shared/lib/rbac/types';
 
 export const authConfig: NextAuthOptions = {
   providers: [
@@ -30,18 +31,19 @@ export const authConfig: NextAuthOptions = {
             role: {
               id: user.role.id,
               name: user.role.name,
+              type: user.role.type,
             },
-            permissions: user.permissions,
+            permissions: user.permissions.map(p => p.name),
           };
         } catch (error) {
-          console.error("Auth error:", error);
+          console.error("Authentication error:", error);
           return null;
         }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -51,13 +53,17 @@ export const authConfig: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id;
-        session.user.email = token.email;
-        session.user.name = token.name;
-        session.user.role = token.role;
-        session.user.permissions = token.permissions;
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        session.user.role = {
+          id: token.role.id,
+          name: token.role.name,
+          type: token.role.type as RoleType,
+        };
+        session.user.permissions = token.permissions as string[];
       }
       return session;
     },

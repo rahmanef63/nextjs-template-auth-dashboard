@@ -1,6 +1,6 @@
 'use client';
 
-import { LoginForm } from 'slices/auth/components/LoginForm';
+import { LoginForm } from 'shared/auth/components/LoginForm';
 import { useAuth } from 'shared/hooks/useAuth';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';

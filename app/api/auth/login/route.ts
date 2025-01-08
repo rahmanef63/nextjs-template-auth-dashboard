@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateUser } from 'slices/auth/services/authService';
+import { authenticateUser } from 'shared/auth/services/authService';
 import { sign } from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 

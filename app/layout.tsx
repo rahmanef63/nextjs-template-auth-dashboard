@@ -1,8 +1,14 @@
 import { Inter } from 'next/font/google';
-import { Providers } from './providers';
+import { Providers } from '../shared/components/layout/providers';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-inter',
+});
 
 export const metadata = {
   title: 'Next.js Template',
