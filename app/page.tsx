@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <div
@@ -8,7 +10,8 @@ export default function Home() {
         textAlign: 'center',
       }}
     >
-      Start prompting.
+      <Link href="/public">Public Page</Link>
+      <Link href="/dashboard">Dashboard</Link>
     </div>
   );
 }

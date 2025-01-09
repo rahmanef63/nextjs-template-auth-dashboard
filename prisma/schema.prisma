@@ -1,89 +1,86 @@
-// This is your updated Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Role {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  type        String    @default("CUSTOM") // Can be: ADMIN, MANAGER, STAFF, CLIENT, CUSTOM
-  permissions Permission[]
+  id          String       @id @default(cuid())
+  name        String       @unique
+  type        String       @default("CUSTOM")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   users       User[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  permissions Permission[] @relation("PermissionToRole")
 
   @@index([name])
 }
 
 model User {
-  id               String          @id @default(cuid())
-  email            String          @unique
-  name             String?
-  password         String
-  role             Role            @relation(fields: [roleId], references: [id])
-  roleId           String
-  profile          Profile?
-  sessions         Session[]
-  createdReports   Report[]        @relation("ReportCreator")
-  assignedReports  Report[]        @relation("AssignedTo")
-  feedbacks        Feedback[]
-  notifications    Notification[]
-  auditLogs        AuditLog[]
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  deletedAt        DateTime?
+  id              String         @id @default(cuid())
+  email           String         @unique
+  name            String?
+  password        String
+  roleId          String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+  auditLogs       AuditLog[]
+  feedbacks       Feedback[]
+  notifications   Notification[]
+  profile         Profile?
+  assignedReports Report[]       @relation("AssignedTo")
+  createdReports  Report[]       @relation("ReportCreator")
+  sessions        Session[]
+  role            Role           @relation(fields: [roleId], references: [id])
 
   @@index([email])
 }
 
 model Permission {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  roles     Role[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  roles     Role[]   @relation("PermissionToRole")
 }
 
 model Profile {
   id        String   @id @default(cuid())
   bio       String?
   avatarUrl String?
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Session {
   id        String   @id @default(cuid())
   sessionId String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   expiresAt DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model Report {
-  id          String   @id @default(cuid())
-  title       String
-  content     String
-  status      String   @default("PENDING")
-  createdBy   User     @relation("ReportCreator", fields: [creatorId], references: [id])
-  creatorId   String
-  assignedTo  User     @relation("AssignedTo", fields: [assignedId], references: [id])
-  assignedId  String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  title      String
+  content    String
+  status     String   @default("PENDING")
+  creatorId  String
+  assignedId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  assignedTo User     @relation("AssignedTo", fields: [assignedId], references: [id])
+  createdBy  User     @relation("ReportCreator", fields: [creatorId], references: [id])
 
   @@index([creatorId])
   @@index([assignedId])
@@ -93,12 +90,10 @@ model Widget {
   id            String   @id @default(cuid())
   name          String
   type          String
-  configuration String   // Changed from Json to String for SQLite compatibility
+  configuration String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
-
-/// New Models Added Below ///
 
 model Announcement {
   id        String   @id @default(cuid())
@@ -110,12 +105,12 @@ model Announcement {
 }
 
 model Feedback {
-  id            String   @id @default(cuid())
-  user          User?    @relation(fields: [userId], references: [id])
-  userId        String?
-  feedbackText  String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(cuid())
+  userId       String?
+  feedbackText String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User?    @relation(fields: [userId], references: [id])
 }
 
 model Mockup {
@@ -149,7 +144,7 @@ model Review {
 
 model Template {
   id        String   @id @default(cuid())
-  type      String   // e.g., Page, Email, Document
+  type      String
   name      String
   content   String
   createdAt DateTime @default(now())
@@ -166,71 +161,71 @@ model Wireframe {
 }
 
 model Notification {
-  id          String    @id @default(cuid())
-  user        User      @relation(fields: [userId], references: [id])
+  id          String   @id @default(cuid())
   userId      String
   type        String
   title       String
   description String
   time        DateTime
-  read        Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model Site {
-  id          String     @id @default(cuid())
-  name        String
-  location    String
-  status      String
-  startDate   DateTime
-  teamSize    Int
-  budget      Budget?
-  progress    Progress[]
-  schedules   Schedule[]
-  contracts   Contract[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id        String     @id @default(cuid())
+  name      String
+  location  String
+  status    String
+  startDate DateTime
+  teamSize  Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  budget    Budget?
+  contracts Contract[]
+  progress  Progress[]
+  schedules Schedule[]
 }
 
 model Budget {
   id          String   @id @default(cuid())
-  site        Site     @relation(fields: [siteId], references: [id])
   siteId      String   @unique
   totalBudget Float
   expenses    Float
   remaining   Float
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  site        Site     @relation(fields: [siteId], references: [id])
 }
 
 model Progress {
   id        String   @id @default(cuid())
-  site      Site     @relation(fields: [siteId], references: [id])
   siteId    String
-  progress  Int      // Percentage (0-100)
+  progress  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  site      Site     @relation(fields: [siteId], references: [id])
 }
 
 model Schedule {
   id          String   @id @default(cuid())
-  site        Site     @relation(fields: [siteId], references: [id])
   siteId      String
   date        DateTime
   description String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  site        Site     @relation(fields: [siteId], references: [id])
 }
 
 model Contract {
-  id          String   @id @default(cuid())
-  name        String
-  document    String   // Path or URL to PDF document
-  site        Site     @relation(fields: [siteId], references: [id])
-  siteId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  document  String
+  siteId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  site      Site     @relation(fields: [siteId], references: [id])
 }
 
 model AuditLog {

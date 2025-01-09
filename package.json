@@ -8,10 +8,11 @@
   },
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "prisma generate && prisma db seed && next build",
+    "build": "npx prisma generate && npx prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
     "seed": "node --loader ts-node/esm prisma/seed.ts",
+    "postinstall": "prisma generate",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
@@ -88,7 +89,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/jest": "^29.5.12",
     "@types/jsonwebtoken": "^9.0.7",
-    "@types/node": "^20.6.2",
+    "@types/node": "^20.17.12",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "bcrypt": "^5.1.1",
