@@ -1,9 +1,16 @@
 import { useCallback } from 'react';
-import type { RoleType } from '../types';
+import { Permission } from '../types/permission-types';
+import { useUser } from '@/shared/hooks/use-user';
+import { hasPermission } from '../lib/permission-utils';
 
-export const usePermission = (userRole: RoleType) => {
+export const usePermission = (requiredPermission: Permission) => {
+  const { user } = useUser();
+
   return useCallback(() => {
-    // For now, just return true since we're focusing on UI/UX
-    return true;
-  }, [userRole]);
+    if (!user || !user.role) {
+      return false;
+    }
+
+    return hasPermission(user.role, requiredPermission);
+  }, [user, requiredPermission]);
 };

@@ -2,9 +2,8 @@ import NextAuth from 'next-auth';
 import { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { authenticateUser } from 'shared/auth/services/authService';
-import type { Session } from 'next-auth';
 
-export const authOptions: AuthOptions = {
+const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -33,7 +32,7 @@ export const authOptions: AuthOptions = {
   ],
   pages: {
     signIn: '/login',
-    error: '/login', // Error code passed in query string as ?error=
+    error: '/login',
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -46,31 +45,23 @@ export const authOptions: AuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (session.user) {
         session.user.id = token.id;
-        session.user.email = token.email || '';
-        session.user.name = token.name || '';
+        session.user.email = token.email;
+        session.user.name = token.name;
         session.user.role = token.role;
         session.user.permissions = token.permissions;
       }
       return session;
-    },
-    async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url;
-      // Default to dashboard for other cases
-      return `${baseUrl}/dashboard`;
     },
   },
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
+
 export { handler as GET, handler as POST };

@@ -11,14 +11,33 @@ interface NavigationStore extends NavigationState {
   setExpanded: (expanded: boolean) => void;
 }
 
-export const isValidRoute = (path: string): boolean => {
+export const isValidRoute = (path: string, role?: string): boolean => {
   if (path === '/dashboard') return true;
-  return MENU_ITEMS.some(item => item.path === path);
+  
+  // If no role is provided, just check if the path exists
+  if (!role) {
+    return MENU_ITEMS.some(item => item.path === path);
+  }
+
+  // If role is provided, check if the path exists and is accessible for the role
+  return MENU_ITEMS.some(item => 
+    item.path === path && (!item.roles || item.roles.includes(role))
+  );
 };
 
-export const getDefaultRoute = (): string => {
-  // Always default to dashboard as it's a core route
-  return '/dashboard';
+export const getDefaultRoute = (role?: string): string => {
+  // If no role or default role, return dashboard
+  if (!role || role === 'user') {
+    return '/dashboard';
+  }
+
+  // For admin and other roles, you can customize the default route
+  switch (role) {
+    case 'admin':
+      return '/dashboard/admin';
+    default:
+      return '/dashboard';
+  }
 };
 
 export const useNavigationStore = create<NavigationStore>()(

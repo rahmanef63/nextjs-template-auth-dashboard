@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Role } from 'shared/types';
-import { getRoles, createRole, updateRole, deleteRole } from 'shared/roles/storage';
+import { Role } from 'shared/permission/types/rbac-types';
+import { getRoles, createRole, updateRole, deleteRole } from 'shared/storage/lib/roles-storage';
 import { Button } from 'shared/components/ui/button';
 import { RoleList } from './role-list';
 import { RoleForm } from './role-form';
@@ -24,8 +24,12 @@ import {
   AlertDialogTitle,
 } from 'shared/components/ui/alert-dialog';
 
-export function RoleManager() {
-  const [roles, setRoles] = useState<Role[]>(getRoles());
+interface RoleManagerProps {
+  roles: Role[];
+  onRoleUpdate: (userId: string, role: Role) => Promise<boolean>;
+}
+
+export function RoleManager({ roles, onRoleUpdate }: RoleManagerProps) {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
@@ -34,7 +38,7 @@ export function RoleManager() {
   const handleCreateRole = (data: Omit<Role, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
       const newRole = createRole(data);
-      setRoles(getRoles());
+      onRoleUpdate('', newRole);
       setIsFormOpen(false);
       toast({
         title: 'Success',
@@ -49,14 +53,11 @@ export function RoleManager() {
     }
   };
 
-  const handleUpdateRole = (data: Omit<Role, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (!selectedRole) return;
-
+  const handleUpdateRole = (id: string, data: Partial<Role>) => {
     try {
-      updateRole(selectedRole.id, data);
-      setRoles(getRoles());
+      const updatedRole = updateRole(id, data);
+      onRoleUpdate('', updatedRole);
       setSelectedRole(null);
-      setIsFormOpen(false);
       toast({
         title: 'Success',
         description: 'Role updated successfully',
@@ -71,72 +72,75 @@ export function RoleManager() {
   };
 
   const handleDeleteRole = () => {
-    if (!roleToDelete) return;
-
-    try {
-      deleteRole(roleToDelete.id);
-      setRoles(getRoles());
-      setRoleToDelete(null);
-      toast({
-        title: 'Success',
-        description: 'Role deleted successfully',
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to delete role',
-        variant: 'destructive',
-      });
+    if (roleToDelete) {
+      try {
+        deleteRole(roleToDelete.id);
+        onRoleUpdate('', roleToDelete);
+        setRoleToDelete(null);
+        toast({
+          title: 'Success',
+          description: 'Role deleted successfully',
+        });
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: error instanceof Error ? error.message : 'Failed to delete role',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Roles</h2>
-        <Button onClick={() => {
-          setSelectedRole(null);
-          setIsFormOpen(true);
-        }}>
-          Create Role
-        </Button>
+        <h2 className="text-lg font-semibold">Roles</h2>
+        <Button onClick={() => setIsFormOpen(true)}>Create Role</Button>
       </div>
 
       <RoleList
         roles={roles}
-        onEdit={(role) => {
-          setSelectedRole(role);
-          setIsFormOpen(true);
-        }}
+        onEdit={setSelectedRole}
         onDelete={setRoleToDelete}
       />
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {selectedRole ? 'Edit Role' : 'Create Role'}
-            </DialogTitle>
+            <DialogTitle>Create Role</DialogTitle>
           </DialogHeader>
-          <RoleForm
-            role={selectedRole || undefined}
-            onSubmit={selectedRole ? handleUpdateRole : handleCreateRole}
-            onCancel={() => setIsFormOpen(false)}
-          />
+          <RoleForm onSubmit={handleCreateRole} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!selectedRole} onOpenChange={() => setSelectedRole(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Role</DialogTitle>
+          </DialogHeader>
+          {selectedRole && (
+            <RoleForm
+              role={selectedRole}
+              onSubmit={(data) => handleUpdateRole(selectedRole.id, data)}
+            />
+          )}
         </DialogContent>
       </Dialog>
 
       <AlertDialog open={!!roleToDelete} onOpenChange={() => setRoleToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Role</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this role? This action cannot be undone.
+              This action cannot be undone. This will permanently delete the role
+              and remove it from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteRole}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteRole}>
+              Continue
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

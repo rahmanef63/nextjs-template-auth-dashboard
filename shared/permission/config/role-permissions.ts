@@ -1,16 +1,14 @@
-import { PERMISSIONS } from '../config/permissions';
+import { Permission, PERMISSIONS } from '../types/permission-types';
+import { RoleType } from '../types';
 
-export const ROLE_PERMISSIONS = {
+export const ROLE_PERMISSIONS: Record<RoleType, Permission[]> = {
   ADMIN: Object.values(PERMISSIONS).flatMap(group => Object.values(group)),
   MANAGER: [
     PERMISSIONS.DASHBOARD.READ,
     PERMISSIONS.DASHBOARD.WRITE,
     PERMISSIONS.USERS.READ,
-    PERMISSIONS.SETTINGS.READ,
-    PERMISSIONS.TEAMS.READ,
-    PERMISSIONS.TEAMS.WRITE,
-    PERMISSIONS.PROJECTS.READ,
-    PERMISSIONS.PROJECTS.WRITE
+    PERMISSIONS.TEAMS.MANAGE,
+    PERMISSIONS.PROJECTS.MANAGE
   ],
   STAFF: [
     PERMISSIONS.DASHBOARD.READ,
@@ -21,6 +19,6 @@ export const ROLE_PERMISSIONS = {
   CLIENT: [
     PERMISSIONS.DASHBOARD.READ,
     PERMISSIONS.PROJECTS.READ
-  ]
+  ],
+  CUSTOM: []
 } as const;
-

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { apiClient } from 'shared/lib/apiClient';
-import { Notification } from 'shared/types/Notification';
+import { Notification } from '@/shared/types/notification-types';
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);

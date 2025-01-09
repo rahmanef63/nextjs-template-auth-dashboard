@@ -1,6 +1,6 @@
 import { apiClient } from 'shared/lib/apiClient';
 import { logger } from 'shared/lib/logger';
-import type { Notification } from 'shared/types/Notification';
+import type { Notification } from '@/shared/types/notification-types';
 
 export class NotificationService {
   private static instance: NotificationService;

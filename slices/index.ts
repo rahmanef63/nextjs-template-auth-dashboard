@@ -11,6 +11,7 @@ export * from './knowledge';
 export * from './metrics';
 export * from './navigation';
 export * from './resources';
+export * from './roles';
 export * from './security';
 export * from './support';
 export * from './tasks';

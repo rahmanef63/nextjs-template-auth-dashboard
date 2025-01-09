@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
-import { storage } from '@/utils/storage';
+import { getFromStorage, saveToStorage } from '../storage/lib';
+import { StorageKey } from '../storage/types/storage-types';
 
-export function useLocalStorage<T>(key: string, initialValue: T) {
+export function useLocalStorage<T>(key: StorageKey, initialValue: T) {
   // Get initial value from storage or use provided initial value
   const [storedValue, setStoredValue] = useState<T>(() => {
-    const item = storage.get(key);
-    return item !== null ? item : initialValue;
+    const item = getFromStorage<T>(key);
+    return item ?? initialValue;
   });
 
   // Update local storage when state changes
   useEffect(() => {
-    storage.set(key, storedValue);
+    saveToStorage(key, storedValue);
   }, [key, storedValue]);
 
   return [storedValue, setStoredValue] as const;

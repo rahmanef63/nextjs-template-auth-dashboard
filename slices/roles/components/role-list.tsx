@@ -1,6 +1,6 @@
 'use client';
 
-import { Role } from '@/lib/roles/types';
+import { Role } from 'shared/permission/types/rbac-types';
 import { Button } from 'shared/components/ui/button';
 import {
   Table,
@@ -24,6 +24,7 @@ export function RoleList({ roles, onEdit, onDelete }: RoleListProps) {
       <TableHeader>
         <TableRow>
           <TableHead>Name</TableHead>
+          <TableHead>Type</TableHead>
           <TableHead>Description</TableHead>
           <TableHead>Created</TableHead>
           <TableHead>Actions</TableHead>
@@ -33,6 +34,7 @@ export function RoleList({ roles, onEdit, onDelete }: RoleListProps) {
         {roles.map((role) => (
           <TableRow key={role.id}>
             <TableCell className="font-medium">{role.name}</TableCell>
+            <TableCell>{role.type}</TableCell>
             <TableCell>{role.description}</TableCell>
             <TableCell>{new Date(role.createdAt).toLocaleDateString()}</TableCell>
             <TableCell>

@@ -1,93 +1,116 @@
 # Authentication Module (`/shared/auth`)
 
 ## Overview
-The authentication module provides a complete authentication solution for the application, including context management, guards, hooks, and services.
+The authentication module provides a complete authentication solution for Next.js applications, implementing secure user authentication, authorization, and session management features.
 
 ## Directory Structure and File Descriptions
 
 ### Root Files
-- `index.ts` - Main entry point, exports all public authentication APIs
-- `README.md` - Module documentation
+- `index.ts` - Main entry point that exports all public authentication APIs
+- `README.md` - Comprehensive module documentation
 
 ### `/components`
-Authentication-related UI components.
-- `LoginForm.tsx` - Login form implementation with email/password authentication
-- `RegisterForm.tsx` - User registration form implementation
+Authentication-related React components:
+- `LoginForm.tsx` - Handles user login with email/password, includes validation and error handling
+- `RegisterForm.tsx` - Manages user registration process with form validation
 
 ### `/constants`
-Authentication-related constant values.
-- `endpoints.ts` - API endpoint definitions for authentication services
-- `roles.ts` - User role definitions and permissions
+Configuration and constant definitions:
+- `endpoints.ts` - Authentication API endpoint configurations
+- `index.ts` - Exports all constants
+- `roles.ts` - User role definitions and associated permissions
 
 ### `/context`
-Authentication state management using React Context.
-- `auth-context.ts` - Type definitions for authentication context
-- `auth-context.tsx` - Authentication context implementation
-- `index.ts` - Context exports
+React Context implementation for auth state:
+- `auth-context.ts` - TypeScript interfaces for auth context
+- `auth-context.tsx` - Core authentication context implementation
+- `index.ts` - Exports context components and hooks
 
 ### `/guards`
-Route protection components.
-- `auth-guard.tsx` - Protects routes based on authentication status
-- `permission-guard.tsx` - Protects routes based on user permissions
+Route protection and authorization:
+- `auth-guard.tsx` - Higher-order component for protecting routes based on authentication status and user roles
 
 ### `/hooks`
-Custom React hooks for authentication.
-- `use-auth.ts` - Hook for accessing authentication context and methods
+Custom React hooks:
+- `use-auth.ts` - Custom hook providing access to authentication state and methods
 
 ### `/lib`
-Authentication utility functions.
-- `api.ts` - Authentication API utility functions
-- `session.ts` - Session management utilities
-- `token.ts` - JWT token management and validation
+Core authentication utilities:
+- `api.ts` - Authentication API integration utilities
+- `session.ts` - Session management and persistence
+- `token.ts` - JWT token handling, storage, and validation
 
 ### `/providers`
-Authentication provider components.
-- `auth-provider.tsx` - Main authentication provider implementation
+Context providers:
+- `auth-provider.tsx` - Authentication provider component with state management
 
 ### `/services`
-Authentication service implementations.
-- `authService.ts` - Core authentication service for API interactions
+Authentication business logic:
+- `authService.ts` - Core service handling authentication operations and API calls
 
 ### `/types`
-Type definitions for authentication.
-- `auth-types.ts` - Core authentication interfaces and types
+TypeScript type definitions:
+- `auth-types.ts` - Core authentication type definitions
 - `index.ts` - Type exports
-- `next-auth.d.ts` - NextAuth type declarations and extensions
-- `session.ts` - Session-related type definitions
+- `next-auth.d.ts` - NextAuth.js type declarations
+- `session.ts` - Session-related interfaces and types
 
 ## Key Features
 
 1. **Authentication Flow**
    - Email/password authentication
-   - Token-based authentication
-   - Session management
-   - Permission-based access control
+   - JWT token management
+   - Secure session handling
+   - Role-based authorization
 
 2. **State Management**
-   - Centralized auth state
+   - Centralized authentication state
+   - Persistent session management
    - Secure token storage
-   - Session persistence
+   - Real-time auth status updates
 
 3. **Security Features**
-   - Role-based access control
-   - Permission-based guards
-   - Secure token handling
-   - Session validation
+   - JWT token validation
+   - Role-based access control (RBAC)
+   - Protected route guards
+   - Secure credential handling
 
 ## Best Practices
 
 1. **Security**
-   - HTTP-only cookies for tokens
+   - HTTP-only cookies for token storage
    - Secure headers implementation
-   - Role-based access control
-   - Permission validation
+   - Proper token validation
+   - XSS protection measures
 
 2. **Error Handling**
-   - Consistent error responses
-   - Session timeout handling
-   - Invalid token management
+   - Comprehensive error states
+   - User-friendly error messages
+   - Session expiration handling
+   - Automatic token refresh
 
 3. **Type Safety**
-   - Strict type checking
-   - Type guards implementation
-   - No 'any' type usage
+   - Strict TypeScript implementation
+   - Comprehensive type definitions
+   - Type guard utilities
+   - Zero any usage policy
+
+## Usage Example
+
+```typescript
+// Using the authentication hook
+import { useAuth } from '@/shared/auth/hooks/use-auth';
+
+function MyComponent() {
+  const { user, login, logout } = useAuth();
+
+  return (
+    <div>
+      {user ? (
+        <button onClick={logout}>Logout</button>
+      ) : (
+        <button onClick={() => login(credentials)}>Login</button>
+      )}
+    </div>
+  );
+}

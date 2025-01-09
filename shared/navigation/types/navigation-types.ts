@@ -1,5 +1,6 @@
-import { Role } from '@/shared/types';
+import { User } from '@/shared/auth/types';
 import { LucideIcon } from 'lucide-react';
+
 // Core feature IDs that map to our slices
 export type FeatureId = 
   | 'dashboard'
@@ -25,14 +26,28 @@ export type FeatureId =
   | 'help'
   | 'support';
 
-export interface MenuItem {
+// Base navigation item type
+export interface NavItem {
   id: FeatureId | string;
-  icon?: LucideIcon;
   label: string;
   path: string;
-  children?: MenuItem[];
+  icon?: LucideIcon;
+  iconName?: string;
+  disabled?: boolean;
+  external?: boolean;
 }
 
+// Menu item extends NavItem with additional properties
+export interface MenuItem extends NavItem {
+  roles?: string[];
+  children?: MenuItem[];
+  permission?: string;
+}
+
+export interface NavigationSection {
+  title: string;
+  items: MenuItem[];
+}
 
 export interface NavigationState {
   expanded: boolean;
@@ -48,7 +63,7 @@ export interface BreadcrumbItem {
 export interface NavigationConfig {
   defaultExpanded: boolean;
   persistState: boolean;
-  storageKey: string;
+  allowMultipleExpanded?: boolean;
 }
 
 export interface NavigationItemProps {
@@ -60,40 +75,26 @@ export interface NavigationItemProps {
 export interface PageRegistryItem {
   id: FeatureId;
   component: () => Promise<{ default: React.ComponentType }>;
+  default: React.ComponentType;
   enabled: boolean;
 }
 
 export type PageRegistry = Record<FeatureId, PageRegistryItem>;
 
-
-
-export interface NavItem {
-  title: string
-  href: string
-  icon: LucideIcon
-  label?: string
+export interface NavigationStore {
+  activeRole: string;
+  pathname?: string;
+  setActiveRole: (role: string) => void;
+  getMenuForRole: () => NavigationSection[];
+  canAccessRoute: (path: string) => boolean;
 }
 
-export interface NavSection {
-  title: string
-  items: NavItem[]
+// Navigation settings type
+export interface NavigationSettings {
+  expanded: boolean;
+  activeRole: string;
+  sections: NavigationSection[];
 }
 
-
-
-export interface UserNavItem {
-  id: string
-  title: string
-  href?: string
-  onClick?: () => void
-}
-
-export interface User {
-  name?: string;
-  email: string
-  avatar?: string
-  id: string;
-  role: Role
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Re-export the User type from auth
+export type { User } from '@/shared/auth/types';

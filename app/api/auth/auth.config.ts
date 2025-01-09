@@ -2,7 +2,7 @@ import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { authenticateUser } from 'shared/auth/services/authService';
 import type { User } from 'next-auth';
-import { RoleType } from 'shared/lib/rbac/types';
+import { RoleType } from 'shared/permission/types/rbac-types';
 
 export const authOptions: NextAuthOptions = {
   providers: [

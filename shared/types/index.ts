@@ -1,33 +1,26 @@
-// Export base types from common
-export * from './common';
+// Export base types
+export * from './common-Types';
+
+// Export auth types (including base User type)
+export * from '../auth/types/auth-types';
 
 // Export feature-specific types
-export * from './ApiResponse';
-export * from './Notification';
-export type { NavItem, NavSection, UserNavItem } from './sidebar';
-export * from './User';
-export * from './analytics';
-export * from './export';
+export * from './apiResponse-types';
+export * from './notification-types';
+export * from './analytics-types';
+export * from './export-types';
 
-// Export auth types
-export type {
-  ApiAuthResponse,
-  AuthFormData,
-  AccessLog
-} from '../auth/types/auth-types';
-
+// Export dashboard types
 export * from '../dashboard/types';
 
 // Export navigation types
-export type * from '../navigation/types';
+export * from '../navigation/types';
 
-// Export role types
-export {
-  RoleType
-} from '../permission/types';
-export type {
-  Role,
-  RoleAssignment,
-} from '../permission/types';
+// Export permission types
+export * from '../permission/types';
 
 // Export storage types
+export * from '../storage/types';
+
+// Export sidebar types (these extend navigation types)
+export * from './sidebar-types';

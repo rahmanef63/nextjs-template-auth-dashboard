@@ -1,16 +1,12 @@
-import { StorageManager } from 'shared/storage/utils/storage-manager';
-import { STORAGE_KEYS } from 'shared/storage/constants/storage.constants';
+import { saveToStorage, getFromStorage, removeFromStorage } from 'shared/storage/lib/storage-lib';
+import { STORAGE_KEYS } from 'shared/storage/config/storage-config';
 import { BudgetEntry } from '../types/budget.types';
 
 export class BudgetStorage {
-  private storage: StorageManager;
-
-  constructor() {
-    this.storage = new StorageManager();
-  }
+  constructor() {}
 
   getBudgetEntries(): BudgetEntry[] {
-    return this.storage.get<BudgetEntry[]>(STORAGE_KEYS.budget) || [];
+    return getFromStorage<BudgetEntry[]>(STORAGE_KEYS.BUDGET) || [];
   }
 
   addBudgetEntry(entry: Omit<BudgetEntry, 'id' | 'createdAt' | 'updatedAt'>): BudgetEntry {
@@ -21,28 +17,24 @@ export class BudgetStorage {
       updatedAt: new Date().toISOString(),
     };
 
-    this.storage.update<BudgetEntry[]>(
-      STORAGE_KEYS.budget,
-      (entries = []) => [...entries, newEntry]
-    );
+    const entries = this.getBudgetEntries();
+    saveToStorage(STORAGE_KEYS.BUDGET, [...entries, newEntry]);
     return newEntry;
   }
 
-  updateBudgetEntry(id: string, updates: Partial<BudgetEntry>): void {
-    this.storage.update<BudgetEntry[]>(
-      STORAGE_KEYS.budget,
-      (entries = []) => entries.map(entry =>
-        entry.id === id
-          ? { ...entry, ...updates, updatedAt: new Date().toISOString() }
-          : entry
-      )
+  updateBudgetEntry(id: string, updates: Partial<Omit<BudgetEntry, 'id' | 'createdAt' | 'updatedAt'>>): void {
+    const entries = this.getBudgetEntries();
+    const updatedEntries = entries.map(entry =>
+      entry.id === id
+        ? { ...entry, ...updates, updatedAt: new Date().toISOString() }
+        : entry
     );
+    saveToStorage(STORAGE_KEYS.BUDGET, updatedEntries);
   }
 
   deleteBudgetEntry(id: string): void {
-    this.storage.update<BudgetEntry[]>(
-      STORAGE_KEYS.budget,
-      (entries = []) => entries.filter(entry => entry.id !== id)
-    );
+    const entries = this.getBudgetEntries();
+    const updatedEntries = entries.filter(entry => entry.id !== id);
+    saveToStorage(STORAGE_KEYS.BUDGET, updatedEntries);
   }
 }

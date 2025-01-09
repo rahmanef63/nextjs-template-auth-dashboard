@@ -1,31 +1,31 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { sidebarData } from 'shared/constants/sidebar';
+import { 
+  NavItem,
+  MenuItem,
+  NavigationSection,
+  NavigationStore,
+} from '../navigation/types/navigation-types';
+import { adminMenuItems, defaultMenuItems } from '../navigation/config/menu-config';
 
-interface MenuItem {
-  href: string;
-  label: string;
-  icon?: React.ComponentType;
-}
+type RoleMenus = {
+  [key: string]: NavigationSection[];
+};
 
-interface SectionItem {
-  label: string;
-  icon?: React.ComponentType;
-  subItems: MenuItem[];
-}
-
-interface MenuSection {
-  title: string;
-  items: SectionItem[];
-}
-
-interface NavigationStore {
-  activeRole: string;
-  pathname?: string;
-  setActiveRole: (role: string) => void;
-  getMenuForRole: () => MenuSection[];
-  canAccessRoute: (path: string) => boolean;
-}
+const navigationData = {
+  roleMenus: {
+    construction: [
+      {
+        title: 'Main',
+        items: defaultMenuItems
+      },
+      {
+        title: 'Administration',
+        items: adminMenuItems
+      }
+    ]
+  } as RoleMenus
+};
 
 export const useNavigation = create<NavigationStore>()(
   persist(
@@ -37,11 +37,11 @@ export const useNavigation = create<NavigationStore>()(
       },
       getMenuForRole: () => {
         const { activeRole } = get();
-        return sidebarData.roleMenus?.[activeRole] || [];
+        return navigationData.roleMenus[activeRole] || [];
       },
       canAccessRoute: (path: string) => {
         const { activeRole } = get();
-        const menuItems = sidebarData.roleMenus?.[activeRole] || [];
+        const menuItems = navigationData.roleMenus[activeRole] || [];
         
         // Common routes are always accessible
         const commonRoutes = ['dashboard', 'profile', 'notifications', 'settings'];
@@ -63,15 +63,13 @@ export const useNavigation = create<NavigationStore>()(
         if (commonRoutes.includes(pathParts[1])) return true;
         
         // Check if the route exists in the role's menu items
-        return menuItems.some((section: MenuSection) => 
-          section.items.some((item: SectionItem) =>
-            item.subItems.some((subItem: MenuItem) => {
-              const subItemPath = subItem.href.startsWith('/') 
-                ? subItem.href.slice(1) 
-                : subItem.href;
-              return pathParts.join('/') === subItemPath;
-            })
-          )
+        return menuItems.some((section: NavigationSection) => 
+          section.items.some((item: MenuItem) => {
+            const itemPath = item.path.startsWith('/') 
+              ? item.path.slice(1) 
+              : item.path;
+            return pathParts.join('/') === itemPath;
+          })
         );
       },
     }),

@@ -27,5 +27,13 @@ export {
   getFilteredMenuItems
 } from './lib/navigation-storage';
 
+export {
+  saveToStorage,
+  getFromStorage,
+  removeFromStorage,
+  updateInStorage,
+  initializeStorage
+} from './lib/storage-lib';
+
 // Export hooks
 export * from './hooks';

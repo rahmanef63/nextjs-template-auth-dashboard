@@ -1,10 +1,17 @@
-import { Role } from 'shared/types';
+import { RoleType } from 'shared/permission/types/rbac-types';
 
 export interface BaseUser {
   id: string;
   email: string;
   name?: string | null;
-  role: Role;
+  role: RoleType;
+}
+
+// The main User type that other modules should extend
+export interface User extends BaseUser {
+  avatar?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface AuthTokens {
@@ -13,7 +20,7 @@ export interface AuthTokens {
 }
 
 export interface ApiAuthResponse {
-  user: BaseUser;
+  user: User;
   tokens: AuthTokens;
 }
 

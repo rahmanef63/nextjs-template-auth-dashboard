@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import type { User } from '../types/next-auth';
+import type { User } from '../types/auth-types';
 import { AuthContext } from '../context/auth-context';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -14,7 +14,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (status === 'loading') {
       setLoading(true);
     } else if (status === 'authenticated' && session?.user) {
-      setUser(session.user as User);
+      // Convert session user to User
+      const fullUser: User = {
+        id: session.user.id,
+        email: session.user.email || '',
+        name: session.user.name || null,
+        role: session.user.role,
+        avatar: session.user.image || undefined,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      setUser(fullUser);
       setLoading(false);
     } else {
       setUser(null);

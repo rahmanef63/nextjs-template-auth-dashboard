@@ -1,3 +1,5 @@
+import { Permission } from "./permission-types";
+
 export enum RoleType {
   ADMIN = "ADMIN",
   MANAGER = "MANAGER",
@@ -17,15 +19,6 @@ export interface Role {
   permissions?: Permission[];
 }
 
-export enum Permission {
-  CREATE = "create",
-  READ = "read",
-  WRITE = "write",
-  DELETE = "delete",
-  OWN = "own",
-  PUBLIC = "public"
-}
-
 export interface AccessControl {
   hasRole: (role: RoleType) => boolean;
 }
@@ -40,4 +33,8 @@ export interface RBACConfig {
   storageKey: string;
   persistState: boolean;
   defaultRole: RoleType;
+  customRoles?: boolean;
+  auditEnabled?: boolean;
 }
+
+export type { Permission } from "./permission-types";

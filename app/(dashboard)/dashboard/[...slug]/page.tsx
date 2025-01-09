@@ -3,11 +3,12 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from 'shared/hooks/useAuth';
 import { ErrorPage } from 'shared/components/pages/error-page';
-import { menuItems } from 'shared/constants/';
+import { MENU_ITEMS } from 'shared/constants/';
 import { PAGE_COMPONENTS } from 'shared/navigation/registry';
 import { isValidRoute, getDefaultRoute } from 'shared/navigation';
 import { useEffect } from 'react';
 import { RolesPage } from 'slices/roles';
+import { MenuItem } from 'shared/navigation/types';
 
 export default function DynamicPage() {
   const params = useParams();
@@ -41,13 +42,13 @@ export default function DynamicPage() {
   }
 
   // Find the matching menu item
-  const menuItem = menuItems.find(item => item.path === path);
-  if (!menuItem) {
+  const matchingMenuItem = MENU_ITEMS.find((item: MenuItem) => item.path === path);
+  if (!matchingMenuItem) {
     return <ErrorPage title="Page Not Found" message="The requested page does not exist." />;
   }
 
   // Get the page component
-  const PageComponent = PAGE_COMPONENTS[menuItem.id as keyof typeof PAGE_COMPONENTS];
+  const PageComponent = PAGE_COMPONENTS[matchingMenuItem.id as keyof typeof PAGE_COMPONENTS];
   if (!PageComponent) {
     return <ErrorPage title="Component Error" message="The page component could not be loaded." />;
   }

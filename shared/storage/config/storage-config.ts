@@ -7,6 +7,10 @@ export const STORAGE_KEYS = {
   ROLE_ASSIGNMENTS: 'role_assignments',
   ROLE_ACTIVITIES: 'role_activities',
   NAVIGATION_SETTINGS: 'navigation_settings',
+  BUDGET: 'budget_entries',
+  DOCUMENTS: 'documents_entries',
+  METRICS: 'metrics_entries',
+  TASKS: 'tasks_entries'
 } as const;
 
 export const DEFAULT_USERS = [

@@ -1,106 +1,106 @@
-import { Role } from 'shared/auth/types';
+import { RoleType } from '@/shared/permission/types';
 import * as pages from '@/slices';
 
 interface PageConfig {
   path: string;
-  roles: Role[];
+  roles: RoleType[];
   component: React.ComponentType;
 }
 
 export const PAGES_CONFIG: PageConfig[] = [
   {
     path: '/audit',
-    roles: ['administrator'],
+    roles: [RoleType.ADMIN],
     component: pages.AuditPage,
   },
   {
     path: '/budget',
-    roles: ['administrator', 'manager'],
+    roles: [RoleType.ADMIN, RoleType.MANAGER],
     component: pages.BudgetPage,
   },
   {
-    path: '/collaboration',
-    roles: ['administrator', 'manager', 'staff'],
-    component: pages.CollaborationPage,
-  },
-  {
     path: '/config',
-    roles: ['administrator'],
+    roles: [RoleType.ADMIN],
     component: pages.ConfigPage,
   },
   {
+    path: '/dashboard',
+    roles: [RoleType.ADMIN, RoleType.MANAGER, RoleType.STAFF, RoleType.CLIENT],
+    component: pages.DashboardPage,
+  },
+  {
     path: '/department',
-    roles: ['administrator', 'manager'],
+    roles: [RoleType.ADMIN, RoleType.MANAGER],
     component: pages.DepartmentPage,
   },
   {
     path: '/documents',
-    roles: ['administrator', 'manager', 'staff'],
+    roles: [RoleType.ADMIN, RoleType.MANAGER, RoleType.STAFF],
     component: pages.DocumentsPage,
   },
   {
     path: '/emergency',
-    roles: ['administrator'],
+    roles: [RoleType.ADMIN],
     component: pages.EmergencyPage,
   },
   {
     path: '/features',
-    roles: ['guest'],
+    roles: [RoleType.CLIENT],
     component: pages.FeaturesPage,
   },
   {
     path: '/knowledge',
-    roles: ['administrator', 'manager', 'staff', 'guest'],
+    roles: [RoleType.ADMIN, RoleType.MANAGER, RoleType.STAFF, RoleType.CLIENT],
     component: pages.KnowledgePage,
   },
   {
     path: '/metrics',
-    roles: ['administrator', 'manager'],
+    roles: [RoleType.ADMIN, RoleType.MANAGER],
     component: pages.MetricsPage,
   },
   {
     path: '/navigation',
-    roles: ['administrator'],
+    roles: [RoleType.ADMIN],
     component: pages.NavigationPage,
   },
   {
+    path: '/profile',
+    roles: [RoleType.ADMIN, RoleType.MANAGER, RoleType.STAFF, RoleType.CLIENT],
+    component: pages.ProfilePage,
+  },
+  {
     path: '/resources',
-    roles: ['administrator', 'manager', 'staff', 'guest'],
+    roles: [RoleType.ADMIN, RoleType.MANAGER, RoleType.STAFF, RoleType.CLIENT],
     component: pages.ResourcesPage,
   },
   {
-    path: '/security',
-    roles: ['administrator'],
-    component: pages.SecurityPage,
+    path: '/roles',
+    roles: [RoleType.ADMIN],
+    component: pages.RolesPage,
   },
   {
     path: '/support',
-    roles: ['administrator', 'manager', 'staff', 'guest'],
+    roles: [RoleType.ADMIN, RoleType.MANAGER, RoleType.STAFF, RoleType.CLIENT],
     component: pages.SupportPage,
   },
   {
     path: '/tasks',
-    roles: ['administrator', 'manager', 'staff'],
+    roles: [RoleType.ADMIN, RoleType.MANAGER, RoleType.STAFF],
     component: pages.TasksPage,
   },
   {
-    path: '/team',
-    roles: ['administrator', 'manager'],
-    component: pages.TeamPage,
-  },
-  {
     path: '/time',
-    roles: ['administrator', 'manager', 'staff'],
+    roles: [RoleType.ADMIN, RoleType.MANAGER, RoleType.STAFF],
     component: pages.TimePage,
   },
   {
     path: '/tools',
-    roles: ['administrator', 'manager', 'staff'],
+    roles: [RoleType.ADMIN, RoleType.MANAGER, RoleType.STAFF],
     component: pages.ToolsPage,
   },
   {
     path: '/users',
-    roles: ['administrator'],
-    component: pages.UsersPage,
+    roles: [RoleType.ADMIN],
+    component: pages.UserManagementPage,
   },
 ];

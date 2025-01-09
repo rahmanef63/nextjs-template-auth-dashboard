@@ -1,16 +1,12 @@
-import { StorageManager } from 'shared/storage/utils/storage-manager';
-import { STORAGE_KEYS } from 'shared/storage/constants/storage.constants';
+import { saveToStorage, getFromStorage, removeFromStorage } from 'shared/storage/lib/storage-lib';
+import { STORAGE_KEYS } from 'shared/storage/config/storage-config';
 import { Metric } from '../types/metric.types';
 
 export class MetricsStorage {
-  private storage: StorageManager;
-
-  constructor() {
-    this.storage = new StorageManager();
-  }
+  constructor() {}
 
   getMetrics(): Metric[] {
-    return this.storage.get<Metric[]>(STORAGE_KEYS.metrics) || [];
+    return getFromStorage<Metric[]>(STORAGE_KEYS.METRICS) || [];
   }
 
   addMetric(metric: Omit<Metric, 'id' | 'timestamp'>): Metric {
@@ -20,26 +16,24 @@ export class MetricsStorage {
       timestamp: new Date().toISOString(),
     };
 
-    this.storage.update<Metric[]>(
-      STORAGE_KEYS.metrics,
-      (metrics = []) => [...metrics, newMetric]
-    );
+    const metrics = this.getMetrics();
+    saveToStorage(STORAGE_KEYS.METRICS, [...metrics, newMetric]);
     return newMetric;
   }
 
-  updateMetric(id: string, updates: Partial<Metric>): void {
-    this.storage.update<Metric[]>(
-      STORAGE_KEYS.metrics,
-      (metrics = []) => metrics.map(metric =>
-        metric.id === id ? { ...metric, ...updates } : metric
-      )
+  updateMetric(id: string, updates: Partial<Omit<Metric, 'id' | 'timestamp'>>): void {
+    const metrics = this.getMetrics();
+    const updatedMetrics = metrics.map(metric =>
+      metric.id === id
+        ? { ...metric, ...updates, timestamp: new Date().toISOString() }
+        : metric
     );
+    saveToStorage(STORAGE_KEYS.METRICS, updatedMetrics);
   }
 
   deleteMetric(id: string): void {
-    this.storage.update<Metric[]>(
-      STORAGE_KEYS.metrics,
-      (metrics = []) => metrics.filter(metric => metric.id !== id)
-    );
+    const metrics = this.getMetrics();
+    const updatedMetrics = metrics.filter(metric => metric.id !== id);
+    saveToStorage(STORAGE_KEYS.METRICS, updatedMetrics);
   }
 }

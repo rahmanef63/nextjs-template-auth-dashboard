@@ -4,10 +4,10 @@ import {
   DollarSign, Kanban, FileText, Wrench, Clock,
   BookOpen, HelpCircle, LifeBuoy, Lock, Settings
 } from 'lucide-react';
-import { MenuItem } from 'shared/navigation/types/navigation-types';
+import { MenuItem } from '../types/navigation-types';
 
 // Core administrative menu items
-const adminMenuItems: MenuItem[] = [
+export const adminMenuItems: MenuItem[] = [
   { 
     id: 'config', 
     icon: Cog, 
@@ -53,7 +53,7 @@ const adminMenuItems: MenuItem[] = [
 ];
 
 // Management menu items
-const managementMenuItems: MenuItem[] = [
+export const managementMenuItems: MenuItem[] = [
   { 
     id: 'department', 
     icon: LayoutDashboard, 
@@ -87,7 +87,7 @@ const managementMenuItems: MenuItem[] = [
 ];
 
 // Staff menu items
-const staffMenuItems: MenuItem[] = [
+export const staffMenuItems: MenuItem[] = [
   { 
     id: 'tasks', 
     icon: Kanban, 
@@ -119,7 +119,7 @@ const staffMenuItems: MenuItem[] = [
 ];
 
 // Guest menu items
-const guestMenuItems: MenuItem[] = [
+export const guestMenuItems: MenuItem[] = [
   { 
     id: 'knowledge', 
     icon: BookOpen, 
@@ -140,7 +140,24 @@ const guestMenuItems: MenuItem[] = [
   },
 ];
 
+// Default menu items that are always shown
+export const defaultMenuItems: MenuItem[] = [
+  { 
+    id: 'dashboard', 
+    icon: LayoutDashboard, 
+    label: 'Dashboard', 
+    path: '/dashboard' 
+  },
+  { 
+    id: 'profile', 
+    icon: UserCog, 
+    label: 'Profile', 
+    path: '/dashboard/profile' 
+  },
+];
+
 export const MENU_ITEMS: MenuItem[] = [
+  ...defaultMenuItems,
   ...adminMenuItems,
   ...managementMenuItems,
   ...staffMenuItems,

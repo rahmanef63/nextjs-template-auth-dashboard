@@ -1,4 +1,4 @@
-export const PERMISSIONS = {
+export const PERMISSION_CONFIG = {
   DASHBOARD: {
     READ: 'dashboard:read',
     WRITE: 'dashboard:write'

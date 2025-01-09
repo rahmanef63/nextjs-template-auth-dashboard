@@ -25,8 +25,11 @@ export function NavigationEditor() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const menuIds = getRoleMenus(selectedRole);
-    setSelectedMenus(menuIds);
+    const loadMenus = async () => {
+      const menuIds = await getRoleMenus(selectedRole);
+      setSelectedMenus(menuIds);
+    };
+    loadMenus();
   }, [selectedRole]);
 
   const handleRoleChange = (roleType: string) => {
@@ -42,17 +45,17 @@ export function NavigationEditor() {
     );
   };
 
-  const handleSave = () => {
-    setRoleMenus(selectedRole, selectedMenus);
+  const handleSave = async () => {
+    await setRoleMenus(selectedRole, selectedMenus);
     toast({
       title: 'Success',
       description: 'Navigation menu updated successfully',
     });
   };
 
-  const handleReset = () => {
-    resetRoleMenus(selectedRole);
-    const defaultMenus = getRoleMenus(selectedRole);
+  const handleReset = async () => {
+    await resetRoleMenus(selectedRole);
+    const defaultMenus = await getRoleMenus(selectedRole);
     setSelectedMenus(defaultMenus);
     toast({
       title: 'Success',

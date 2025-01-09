@@ -1,9 +1,10 @@
-import { NextAuthOptions } from 'next-auth';
+import { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { authenticateUser } from 'shared/auth/services/authService';
-import { RoleType } from '@/shared/permission/types';
+import type { User } from 'next-auth';
+import { RoleType } from 'shared/permission/types/rbac-types';
 
-export const authConfig: NextAuthOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -11,30 +12,18 @@ export const authConfig: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
         try {
           const user = await authenticateUser(credentials.email, credentials.password);
-          
           if (!user) {
             console.log("Authentication failed");
             return null;
           }
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: {
-              id: user.role.id,
-              name: user.role.name,
-              type: user.role.type,
-            },
-            permissions: user.permissions.map(p => p.name),
-          };
+          return user;
         } catch (error) {
           console.error("Authentication error:", error);
           return null;
@@ -42,8 +31,12 @@ export const authConfig: NextAuthOptions = {
       },
     }),
   ],
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -53,23 +46,19 @@ export const authConfig: NextAuthOptions = {
       }
       return token;
     },
-    session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
-        session.user.role = token.role as RoleType;
-        session.user.permissions = token.permissions as string[];
+    async session({ session, token }: { session: any; token: any }) {
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.role = token.role;
+        session.user.permissions = token.permissions;
       }
       return session;
     },
   },
-  pages: {
-    signIn: '/login',
-    error: '/login',
-  },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET,
 };

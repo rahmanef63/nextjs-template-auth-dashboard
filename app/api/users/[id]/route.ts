@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { prisma } from 'shared/lib/prisma';
-import { rolePermissions } from 'shared/lib/rbac/permissions';
+import { prisma } from '@/shared/lib/prisma';
+import { RoleType } from '@/shared/types';
+import { Permission } from '@/shared/permission/types/permission-types';
+
+// Function to get permissions for a role from the server
+async function getRolePermissions(role: RoleType): Promise<Permission[]> {
+  const response = await fetch(`/api/rbac/permissions/role/${role}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch role permissions');
+  }
+  return response.json();
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,8 +20,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userRole = session.user.role.name.toUpperCase();
-    if (!rolePermissions[userRole]?.includes('users:read')) {
+    const userRole = session.user.role;
+    const permissions = await getRolePermissions(userRole);
+    if (!permissions.includes('users:read')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

@@ -1,6 +1,6 @@
 import { STORAGE_KEYS } from '../config/storage-config';
 import type { User } from '../../auth/types';
-import type { NavigationSettings } from '../../navigation/types/navigation.types';
+import type { NavigationSettings } from '../../navigation/types/navigation-types';
 
 export type StorageKey = keyof typeof STORAGE_KEYS | (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
 
@@ -14,4 +14,3 @@ export interface IStorageService {
 
 // Re-export needed types
 export type { User, NavigationSettings };
-

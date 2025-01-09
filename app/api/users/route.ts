@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from 'shared/lib/prisma';
-import { rolePermissions } from 'shared/lib/rbac/permissions';
+import { RoleType } from '@/shared/types';
+import { Permission } from '@/shared/permission/types/permission-types';
 import { z } from 'zod';
 
 const userUpdateSchema = z.object({
@@ -16,6 +17,15 @@ const getUserSchema = z.object({
   search: z.string().optional(),
 });
 
+// Function to get permissions for a role from the server
+async function getRolePermissions(role: RoleType): Promise<Permission[]> {
+  const response = await fetch(`/api/rbac/permissions/role/${role}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch role permissions');
+  }
+  return response.json();
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession();
@@ -24,7 +34,8 @@ export async function GET(request: NextRequest) {
     }
 
     const userRole = session.user.role.name.toUpperCase();
-    if (!rolePermissions[userRole]?.includes('users:read')) {
+    const rolePermissions = await getRolePermissions(userRole);
+    if (!rolePermissions.includes('users:read')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

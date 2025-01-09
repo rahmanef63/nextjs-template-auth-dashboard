@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from 'shared/constants/endpoints';
-import { ApiResponse } from 'shared/types/ApiResponse';
+import { ApiResponse } from '@/shared/types/apiResponse-types';
 
 class ApiClient {
   private static instance: ApiClient;

@@ -1,6 +1,6 @@
 import { apiClient } from 'shared/lib/apiClient';
 import { logger } from 'shared/lib/logger';
-import type { AnalyticsData } from '@/shared/types/analytics';
+import type { AnalyticsData } from '@/shared/types/analytics-types';
 
 export class AnalyticsService {
   private static instance: AnalyticsService;

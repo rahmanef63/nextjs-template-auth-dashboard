@@ -1,6 +1,6 @@
 'use client';
 
-import { Role } from '@/lib/roles/types';
+import { Role } from 'shared/types';
 import { Button } from 'shared/components/ui/button';
 import {
   Table,

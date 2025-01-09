@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { Permission } from 'shared/permission/types/rbac-types';
+import { Permission, PERMISSIONS } from 'shared/permission/types/permission-types';
 import { FeatureId } from 'shared/navigation/types';
 import { useNavigationPermissions } from '../store/navigation-permissions';
 import {
@@ -14,7 +14,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Button } from 'shared/components/ui/button';
 
-const permissionOptions = Object.values(Permission);
+const permissionOptions = [
+  PERMISSIONS.USERS.READ,
+  PERMISSIONS.USERS.WRITE,
+  PERMISSIONS.USERS.MANAGE
+];
 
 export function NavigationPermissions() {
   const { permissions, updatePermissions } = useNavigationPermissions();
@@ -33,7 +37,7 @@ export function NavigationPermissions() {
   const grantAllPermissions = useCallback(() => {
     const allWritePermissions = Object.keys(permissions).reduce((acc, featureId) => ({
       ...acc,
-      [featureId]: Permission.WRITE
+      [featureId]: PERMISSIONS.USERS.WRITE
     }), {});
     setPermissions(allWritePermissions as Record<FeatureId, Permission>);
   }, [permissions, setPermissions]);
@@ -49,7 +53,7 @@ export function NavigationPermissions() {
       <CardContent className="space-y-4">
         {Object.entries(permissions).map(([featureId, permission]) => (
           <div key={featureId} className="flex items-center justify-between">
-            <span className="capitalize">{featureId.replace(/_/g, ' ')}</span>
+            <span className="text-sm font-medium">{featureId}</span>
             <Select
               value={permission}
               onValueChange={(value) => handlePermissionChange(featureId as FeatureId, value as Permission)}
@@ -60,7 +64,7 @@ export function NavigationPermissions() {
               <SelectContent>
                 {permissionOptions.map((option) => (
                   <SelectItem key={option} value={option}>
-                    {option.toLowerCase().replace(/_/g, ' ')}
+                    {option}
                   </SelectItem>
                 ))}
               </SelectContent>

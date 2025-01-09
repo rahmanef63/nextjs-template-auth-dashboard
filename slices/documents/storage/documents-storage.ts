@@ -1,16 +1,12 @@
-import { StorageManager } from 'shared/storage/utils/storage-manager';
-import { STORAGE_KEYS } from 'shared/storage/constants/storage.constants';
+import { saveToStorage, getFromStorage, removeFromStorage } from 'shared/storage/lib/storage-lib';
+import { STORAGE_KEYS } from 'shared/storage/config/storage-config';
 import { Document } from '../types/document.types';
 
 export class DocumentsStorage {
-  private storage: StorageManager;
-
-  constructor() {
-    this.storage = new StorageManager();
-  }
+  constructor() {}
 
   getDocuments(): Document[] {
-    return this.storage.get<Document[]>(STORAGE_KEYS.documents) || [];
+    return getFromStorage<Document[]>(STORAGE_KEYS.DOCUMENTS) || [];
   }
 
   addDocument(document: Omit<Document, 'id' | 'createdAt' | 'updatedAt'>): Document {
@@ -21,28 +17,24 @@ export class DocumentsStorage {
       updatedAt: new Date().toISOString(),
     };
 
-    this.storage.update<Document[]>(
-      STORAGE_KEYS.documents,
-      (docs = []) => [...docs, newDocument]
-    );
+    const documents = this.getDocuments();
+    saveToStorage(STORAGE_KEYS.DOCUMENTS, [...documents, newDocument]);
     return newDocument;
   }
 
-  updateDocument(id: string, updates: Partial<Document>): void {
-    this.storage.update<Document[]>(
-      STORAGE_KEYS.documents,
-      (docs = []) => docs.map(doc => 
-        doc.id === id 
-          ? { ...doc, ...updates, updatedAt: new Date().toISOString() }
-          : doc
-      )
+  updateDocument(id: string, updates: Partial<Omit<Document, 'id' | 'createdAt' | 'updatedAt'>>): void {
+    const documents = this.getDocuments();
+    const updatedDocuments = documents.map(doc =>
+      doc.id === id
+        ? { ...doc, ...updates, updatedAt: new Date().toISOString() }
+        : doc
     );
+    saveToStorage(STORAGE_KEYS.DOCUMENTS, updatedDocuments);
   }
 
   deleteDocument(id: string): void {
-    this.storage.update<Document[]>(
-      STORAGE_KEYS.documents,
-      (docs = []) => docs.filter(doc => doc.id !== id)
-    );
+    const documents = this.getDocuments();
+    const updatedDocuments = documents.filter(doc => doc.id !== id);
+    saveToStorage(STORAGE_KEYS.DOCUMENTS, updatedDocuments);
   }
 }

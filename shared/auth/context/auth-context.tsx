@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import type { Session } from 'next-auth';
-import type { User } from '../types/next-auth';
+import type { User } from '../types/auth-types';
 
 export interface AuthContextType {
   session: Session | null;
@@ -14,9 +14,9 @@ export interface AuthContextType {
   loading?: boolean;
 }
 
-const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = React.useState(true);
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -37,7 +37,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{
       session,
-      user: session?.user ?? null,
+      user: session?.user ? {
+        id: session.user.id,
+        email: session.user.email || '',
+        name: session.user.name || null,
+        role: session.user.role,
+        avatar: session.user.image || undefined,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      } : null,
       login,
       logout,
       loading
@@ -45,14 +53,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth(): AuthContextType {
-  const context = React.useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
-
-export { AuthContext };
+};

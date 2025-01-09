@@ -1,17 +1,15 @@
-export { AuthProvider, type AuthContextType } from './context/auth-context';
-export { useAuth } from './hooks/use-auth';
-export { AuthGuard } from './guards/auth-guard';
+export * from './context/auth-context';
+export * from './hooks/use-auth';
+export * from './guards/auth-guard';
 
 // Re-export types
 export type {
-  AuthUser,
-  AuthState,
+  User,
+  BaseUser,
   AuthTokens,
-  AuthResponse,
-  LoginResponse,
-  RegisterResponse,
+  ApiAuthResponse as AuthResponse,
   AuthFormData,
-  Role,
-  Session,
   AccessLog
-} from './types';
+} from './types/auth-types';
+
+export type { Session } from './types/session';

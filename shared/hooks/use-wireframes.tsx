@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useToast } from "shared/components/ui/use-toast";
+import { useToast } from "shared/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface Wireframe {

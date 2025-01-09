@@ -16,40 +16,41 @@ interface NavigationSettings {
 const defaultNavigation: MenuItem[] = [];
 
 // Get menu items for a specific role
-export function getRoleMenus(role: Role): string[] {
+export async function getRoleMenus(role: Role): Promise<string[]> {
   try {
     const storedSettings = localStorage.getItem(MENU_STORAGE_KEY);
     if (!storedSettings) {
-      return getDefaultMenus(role.type);
+      return await getDefaultMenus(role.type);
     }
 
     const settings = JSON.parse(storedSettings) as MenuSettings;
     const roleType = role.type.toString();
-    return settings[roleType] || getDefaultMenus(role.type);
+    const storedMenus = settings[roleType];
+    if (!storedMenus) {
+      return await getDefaultMenus(role.type);
+    }
+    return Array.isArray(storedMenus) ? storedMenus : [];
   } catch (error) {
     console.error('Error reading menu settings:', error);
-    return getDefaultMenus(role.type);
+    return await getDefaultMenus(role.type);
   }
 }
 
 // Set menu items for a specific role
-export function setRoleMenus(role: Role, menuIds: string[]): void {
+export async function setRoleMenus(role: Role, menuIds: string[]): Promise<void> {
   try {
     const storedSettings = localStorage.getItem(MENU_STORAGE_KEY);
-    const settings = storedSettings ? JSON.parse(storedSettings) as MenuSettings : {};
+    const settings: MenuSettings = storedSettings ? JSON.parse(storedSettings) : {};
     const roleType = role.type.toString();
-
-    localStorage.setItem(MENU_STORAGE_KEY, JSON.stringify({
-      ...settings,
-      [roleType]: menuIds
-    }));
+    settings[roleType] = Array.isArray(menuIds) ? menuIds : await getDefaultMenus(role.type);
+    localStorage.setItem(MENU_STORAGE_KEY, JSON.stringify(settings));
   } catch (error) {
     console.error('Error saving menu settings:', error);
   }
 }
 
 // Get navigation items for a specific role
-export function getNavigationByRole(role: Role): MenuItem[] {
+export async function getNavigationByRole(role: Role): Promise<MenuItem[]> {
   try {
     const storedSettings = localStorage.getItem(NAVIGATION_STORAGE_KEY);
     if (!storedSettings) {
@@ -66,7 +67,7 @@ export function getNavigationByRole(role: Role): MenuItem[] {
 }
 
 // Set navigation items for a specific role
-export function setNavigationForRole(role: Role, items: MenuItem[]): void {
+export async function setNavigationForRole(role: Role, items: MenuItem[]): Promise<void> {
   try {
     const storedSettings = localStorage.getItem(NAVIGATION_STORAGE_KEY);
     const settings = storedSettings ? JSON.parse(storedSettings) as NavigationSettings : {};
@@ -82,7 +83,7 @@ export function setNavigationForRole(role: Role, items: MenuItem[]): void {
 }
 
 // Clear navigation items for a specific role
-export function clearNavigationForRole(role: Role): void {
+export async function clearNavigationForRole(role: Role): Promise<void> {
   try {
     const storedSettings = localStorage.getItem(NAVIGATION_STORAGE_KEY);
     if (!storedSettings) return;
@@ -100,13 +101,13 @@ export function clearNavigationForRole(role: Role): void {
 }
 
 // Get filtered menu items based on role and allowed menu IDs
-export function getFilteredMenuItems(items: MenuItem[], role: Role): MenuItem[] {
-  const allowedMenuIds = getRoleMenus(role);
+export async function getFilteredMenuItems(items: MenuItem[], role: Role): Promise<MenuItem[]> {
+  const allowedMenuIds = await getRoleMenus(role);
   return items.filter(item => allowedMenuIds.includes(item.id));
 }
 
 // Reset menu items for a specific role to defaults
-export function resetRoleMenus(role: Role): void {
+export async function resetRoleMenus(role: Role): Promise<void> {
   try {
     const storedSettings = localStorage.getItem(MENU_STORAGE_KEY);
     const settings = storedSettings ? JSON.parse(storedSettings) as MenuSettings : {};
@@ -114,7 +115,7 @@ export function resetRoleMenus(role: Role): void {
 
     localStorage.setItem(MENU_STORAGE_KEY, JSON.stringify({
       ...settings,
-      [roleType]: getDefaultMenus(role.type)
+      [roleType]: await getDefaultMenus(role.type)
     }));
   } catch (error) {
     console.error('Error resetting menu settings:', error);

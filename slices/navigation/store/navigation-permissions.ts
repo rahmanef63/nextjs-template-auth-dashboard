@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Permission } from 'shared/permission/types/rbac-types';
+import { Permission, PERMISSIONS } from 'shared/permission/types/permission-types';
 import { FeatureId } from 'shared/navigation/types';
 import { NAVIGATION_PERMISSIONS } from 'shared/navigation/constants/permissions';
 import { NavigationPermissionState } from '../types';
@@ -7,7 +7,7 @@ import { NavigationPermissionState } from '../types';
 // Initialize with default read permissions for all features
 const initialPermissions = Object.values(NAVIGATION_PERMISSIONS).reduce((acc, featureId) => ({
   ...acc,
-  [featureId]: Permission.READ
+  [featureId]: PERMISSIONS.USERS.READ
 }), {} as Record<FeatureId, Permission>);
 
 export const useNavigationPermissions = create<NavigationPermissionState>((set) => ({

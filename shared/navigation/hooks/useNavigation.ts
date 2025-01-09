@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import type { MenuItem, RoleType } from '../types/navigation-types';
+import type { MenuItem } from '../types/navigation-types';
 import { useNavigationStore } from '../lib/navigation-store';
 
 export const useNavigation = () => {

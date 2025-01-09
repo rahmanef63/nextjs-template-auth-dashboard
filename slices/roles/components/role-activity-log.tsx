@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from 'shared/components/ui/card';
-import { RoleActivityMonitor } from 'shared/rbac/activity-monitor';
+import { RoleActivityMonitor } from 'shared/permission/lib/activity-monitor';
 import { ScrollArea } from 'shared/components/ui/scroll-area';
 
 export function RoleActivityLog() {

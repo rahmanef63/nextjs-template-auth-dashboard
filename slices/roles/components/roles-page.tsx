@@ -2,36 +2,40 @@
 
 import { PageHeader } from 'shared/components/pages/page-header';
 import { Shield } from 'lucide-react';
-import { RoleManager } from 'shared/components/devtools/role-manager';
-import { RoleActivityLog } from 'shared/components/roles/role-activity-log';
+import { RoleManager } from './role-manager';
+import { RoleActivityLog } from './role-activity-log';
 import { ErrorPage } from 'shared/components/pages/error-page';
-import { useAuth } from 'shared/auth/contexts/auth-context';
-import { getAllUsers, updateUserRole } from 'shared/auth/utils/auth-utils';
+import { useAuth } from 'shared/hooks/';
+import { getRoles, assignRole } from 'shared/storage/lib/roles-storage';
 import { useState, useEffect } from 'react';
-import { User } from 'shared/auth/types';
-import { Role } from 'shared/roles/types/role-types';
+import { Role, RoleType } from 'shared/permission/types/rbac-types';
+import { User } from 'shared/auth/types/auth-types';
 
 export function RolesPage() {
   const { user } = useAuth();
-  const [users, setUsers] = useState<Omit<User, 'password'>[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
 
   useEffect(() => {
-    const loadUsers = () => {
-      const allUsers = getAllUsers();
-      setUsers(allUsers);
+    const loadRoles = () => {
+      const allRoles = getRoles();
+      setRoles(allRoles);
     };
 
-    loadUsers();
+    loadRoles();
   }, []);
 
   const handleRoleUpdate = async (userId: string, role: Role) => {
-    const success = updateUserRole(userId, role);
-    if (success) {
-      setUsers(getAllUsers());
+    try {
+      assignRole(userId, role.id);
+      setRoles(getRoles());
+      return true;
+    } catch (error) {
+      console.error('Error updating role:', error);
+      return false;
     }
   };
 
-  if (user?.role !== 'administrator') {
+  if (user?.role !== RoleType.ADMIN) {
     return <ErrorPage />;
   }
 
@@ -45,7 +49,7 @@ export function RolesPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-6">
           <RoleManager 
-            users={users}
+            roles={roles}
             onRoleUpdate={handleRoleUpdate}
           />
         </div>

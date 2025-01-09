@@ -1,10 +1,11 @@
 import { useMemo } from "react"
 import { useSession } from "next-auth/react"
 import { 
-  ADMIN_MENU_ITEMS, 
-  MANAGER_MENU_ITEMS, 
-  CORE_MENU_ITEMS 
-} from "shared/navigation"
+  adminMenuItems,
+  managementMenuItems,
+  staffMenuItems,
+  guestMenuItems
+} from "shared/navigation/config/menu-config"
 import { RoleType } from "shared/permission/types"
 import { MenuItem } from "shared/navigation/types"
 
@@ -13,17 +14,17 @@ export function useNavigationItems(): MenuItem[] {
   
   return useMemo(() => {
     if (!session?.user?.role?.type) {
-      return CORE_MENU_ITEMS
+      return guestMenuItems
     }
 
     const userRole = session.user.role.type as RoleType
     switch (userRole) {
       case "ADMIN":
-        return ADMIN_MENU_ITEMS
+        return adminMenuItems
       case "MANAGER":
-        return MANAGER_MENU_ITEMS
+        return managementMenuItems
       default:
-        return CORE_MENU_ITEMS
+        return guestMenuItems
     }
   }, [session?.user?.role?.type])
 }

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { User } from 'shared/types/sidebar';
+import { User } from '@/shared/types';
 
 interface UserStore {
   user: User | null;

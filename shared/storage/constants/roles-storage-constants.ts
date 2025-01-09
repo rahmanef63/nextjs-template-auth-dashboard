@@ -1,13 +1,12 @@
 import { Role, RoleType } from '../../types';
-import { Permission } from 'shared/permission/types/rbac-types';
+import { Permission, PERMISSIONS } from 'shared/permission/types/permission-types';
 
-export const DEFAULT_PERMISSIONS = [
-  Permission.CREATE,
-  Permission.READ,
-  Permission.WRITE,
-  Permission.DELETE,
-  Permission.OWN,
-  Permission.PUBLIC
+export const DEFAULT_PERMISSIONS: Permission[] = [
+  PERMISSIONS.USERS.CREATE,
+  PERMISSIONS.USERS.READ,
+  PERMISSIONS.USERS.WRITE,
+  PERMISSIONS.USERS.DELETE,
+  PERMISSIONS.USERS.MANAGE
 ];
 
 export const ADMINISTRATOR_ROLE: Role = {
