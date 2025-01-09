@@ -2,6 +2,8 @@ import NextAuth from 'next-auth';
 import { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { authenticateUser } from 'shared/auth/services/authService';
+import { Session } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
 
 const authOptions: AuthOptions = {
   providers: [
@@ -45,13 +47,13 @@ const authOptions: AuthOptions = {
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: any }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
-        session.user.id = token.id;
-        session.user.email = token.email;
-        session.user.name = token.name;
-        session.user.role = token.role;
-        session.user.permissions = token.permissions;
+        session.user.id = token.sub ?? '';
+        session.user.email = token.email ?? '';
+        session.user.name = token.name ?? '';
+        session.user.role = token.role ?? 'user';
+        session.user.permissions = token.permissions ?? [];
       }
       return session;
     },

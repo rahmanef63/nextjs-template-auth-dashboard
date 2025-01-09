@@ -14,7 +14,7 @@ export class AnalyticsService {
     return AnalyticsService.instance;
   }
 
-  async trackEvent(eventName: string, data: Record<string, any>) {
+  async trackEvent(eventName: string, data: Record<string, unknown>) {
     try {
       await apiClient.post('/api/analytics/events', {
         name: eventName,

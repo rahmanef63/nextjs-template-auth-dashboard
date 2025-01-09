@@ -10,7 +10,7 @@ export const notificationSchema = z.object({
     NOTIFICATION_TYPES.ERROR,
   ]),
   userId: z.string().uuid(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
 });
 
 export type NotificationInput = z.infer<typeof notificationSchema>;

@@ -50,14 +50,14 @@ class ApiClient {
     return this.fetchWithAuth<T>(endpoint, { method: 'GET' });
   }
 
-  public async post<T>(endpoint: string, data: any): Promise<ApiResponse<T>> {
+  public async post<T, D extends Record<string, unknown>>(endpoint: string, data: D): Promise<ApiResponse<T>> {
     return this.fetchWithAuth<T>(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  public async put<T>(endpoint: string, data: any): Promise<ApiResponse<T>> {
+  public async put<T, D extends Record<string, unknown>>(endpoint: string, data: D): Promise<ApiResponse<T>> {
     return this.fetchWithAuth<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),

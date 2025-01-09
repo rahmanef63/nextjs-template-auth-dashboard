@@ -1,4 +1,4 @@
-export function isValidDate(date: any): boolean {
+export function isValidDate(date: Date | number | string): boolean {
   return date instanceof Date && !isNaN(date.getTime());
 }
 

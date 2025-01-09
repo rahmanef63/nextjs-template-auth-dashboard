@@ -5,7 +5,7 @@ export interface AuditLogData {
   userId: string;
   action: string;
   resource: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export async function createAuditLog(data: AuditLogData) {

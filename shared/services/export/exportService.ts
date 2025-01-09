@@ -2,6 +2,11 @@ import { apiClient } from 'shared/lib/apiClient';
 import { logger } from 'shared/lib/logger';
 import type { ExportOptions, ExportResult } from '@/shared/types/export-types';
 
+interface ExportRequest extends Record<string, unknown> {
+  type: string;
+  options: ExportOptions;
+}
+
 export class ExportService {
   private static instance: ExportService;
 
@@ -16,7 +21,7 @@ export class ExportService {
 
   async exportData(type: string, options: ExportOptions): Promise<ExportResult> {
     try {
-      const response = await apiClient.post<ExportResult>('/api/export', {
+      const response = await apiClient.post<ExportResult, ExportRequest>('/api/export', {
         type,
         options
       });

@@ -13,9 +13,26 @@ export interface DashboardStats {
   }>;
 }
 
+export type DashboardWidgetData = {
+  stats?: {
+    value: number;
+    label: string;
+    change?: number;
+  };
+  chart?: {
+    labels: string[];
+    values: number[];
+    type: 'line' | 'bar' | 'pie';
+  };
+  table?: {
+    headers: string[];
+    rows: Array<Record<string, string | number>>;
+  };
+};
+
 export interface DashboardWidget {
   id: string;
   title: string;
   type: 'stats' | 'chart' | 'table';
-  data: any;
+  data: DashboardWidgetData;
 }

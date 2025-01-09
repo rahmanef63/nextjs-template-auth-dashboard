@@ -17,7 +17,7 @@ class Logger {
     return Logger.instance;
   }
 
-  private formatMessage(level: LogLevel, message: string, data?: any): string {
+  private formatMessage(level: LogLevel, message: string, data?: Record<string, unknown>): string {
     const timestamp = new Date().toISOString();
     const appName = appConfig.name;
     return `[${timestamp}] [${appName}] [${level.toUpperCase()}] ${message}${
@@ -25,7 +25,7 @@ class Logger {
     }`;
   }
 
-  private log(level: LogLevel, message: string, data?: any) {
+  private log(level: LogLevel, message: string, data?: Record<string, unknown>) {
     const formattedMessage = this.formatMessage(level, message, data);
     
     switch (level) {
@@ -46,19 +46,19 @@ class Logger {
     }
   }
 
-  public info(message: string, data?: any) {
+  public info(message: string, data?: Record<string, unknown>) {
     this.log('info', message, data);
   }
 
-  public warn(message: string, data?: any) {
+  public warn(message: string, data?: Record<string, unknown>) {
     this.log('warn', message, data);
   }
 
-  public error(message: string, data?: any) {
+  public error(message: string, data?: Record<string, unknown>) {
     this.log('error', message, data);
   }
 
-  public debug(message: string, data?: any) {
+  public debug(message: string, data?: Record<string, unknown>) {
     this.log('debug', message, data);
   }
 }
