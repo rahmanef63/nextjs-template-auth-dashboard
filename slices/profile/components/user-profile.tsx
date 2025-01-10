@@ -6,9 +6,7 @@ import {
   ChevronsUpDown,
   CreditCard,
   LogOut,
-  Sparkles,
   Settings,
-  User,
   Mail,
   Shield,
   Keyboard,
@@ -39,25 +37,24 @@ import {
 import { useAuth } from "shared/hooks/useAuth"
 import { useToast } from "shared/hooks/use-toast"
 import { useState, useEffect } from 'react'
-import { 
-  SettingsDrawer, 
-  ProfileDrawer, 
-  NotificationsDrawer, 
-  MessagesDrawer, 
-  PrivacyDrawer, 
-  HelpDrawer 
-} from "./drawers"
+import { DynamicSheet } from "./dynamic-sheet"
+import { DynamicDrawer } from "./dynamic-drawer"
+import { Button } from "shared/components/ui/button"
+import { useMediaQuery } from "shared/hooks/use-media-query"
+import { UserMenuType } from './types'
 
 export function UserProfile() {
   const { user, logout } = useAuth()
   const { toast } = useToast()
-  const [open, setOpen] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
   const { isMobile, state } = useSidebar()
+  const [activeDialog, setActiveDialog] = useState<UserMenuType | null>(null)
+  const isDesktop = useMediaQuery("(min-width: 768px)")
 
   // Close dropdown when sidebar collapses
   useEffect(() => {
     if (state === "collapsed") {
-      setOpen(false)
+      setDropdownOpen(false)
     }
   }, [state])
 
@@ -79,23 +76,41 @@ export function UserProfile() {
     }
   }
 
-  const openDrawer = (drawerId: string) => {
-    document
-      .querySelector<HTMLButtonElement>(`[data-drawer-trigger="${drawerId}"]`)
-      ?.click()
+  const userMenuTypes: UserMenuType[] = ["settings", "profile", "notifications", "messages", "privacy", "help"]
+
+  const handleDialogOpen = (type: UserMenuType) => {
+    setActiveDialog(type)
+    setDropdownOpen(false)
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) setActiveDialog(null)
   }
 
   return (
     <>
-      <SettingsDrawer />
-      <ProfileDrawer />
-      <NotificationsDrawer />
-      <MessagesDrawer />
-      <PrivacyDrawer />
-      <HelpDrawer />
+      {userMenuTypes.map((type) => (
+        isDesktop ? (
+          <DynamicSheet
+            key={type}
+            type={type}
+            open={activeDialog === type}
+            onOpenChange={handleOpenChange}
+            trigger={<Button variant="ghost" className="hidden" />}
+          />
+        ) : (
+          <DynamicDrawer
+            key={type}
+            type={type}
+            open={activeDialog === type}
+            onOpenChange={handleOpenChange}
+            trigger={<Button variant="ghost" className="hidden" />}
+          />
+        )
+      ))}
       <SidebarMenu>
         <SidebarMenuItem>
-          <DropdownMenu open={open} onOpenChange={setOpen}>
+          <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="lg"
@@ -146,14 +161,7 @@ export function UserProfile() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Upgrade to Pro
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem onSelect={() => openDrawer("profile")}>
+                <DropdownMenuItem onSelect={() => handleDialogOpen("profile")}>
                   <BadgeCheck className="mr-2 h-4 w-4" />
                   Account
                   <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
@@ -162,22 +170,22 @@ export function UserProfile() {
                   <CreditCard className="mr-2 h-4 w-4" />
                   Billing
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => openDrawer("notifications")}>
+                <DropdownMenuItem onSelect={() => handleDialogOpen("notifications")}>
                   <Bell className="mr-2 h-4 w-4" />
                   Notifications
                   <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => openDrawer("messages")}>
+                <DropdownMenuItem onSelect={() => handleDialogOpen("messages")}>
                   <Mail className="mr-2 h-4 w-4" />
                   Messages
                   <DropdownMenuShortcut>⌘M</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => openDrawer("settings")}>
+                <DropdownMenuItem onSelect={() => handleDialogOpen("settings")}>
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                   <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => openDrawer("privacy")}>
+                <DropdownMenuItem onSelect={() => handleDialogOpen("privacy")}>
                   <Shield className="mr-2 h-4 w-4" />
                   Privacy
                 </DropdownMenuItem>
@@ -189,7 +197,7 @@ export function UserProfile() {
                   Keyboard shortcuts
                   <DropdownMenuShortcut>?</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => openDrawer("help")}>
+                <DropdownMenuItem onSelect={() => handleDialogOpen("help")}>
                   <HelpCircle className="mr-2 h-4 w-4" />
                   Help & Support
                 </DropdownMenuItem>
