@@ -1,7 +1,7 @@
-import { BaseUser } from 'shared/auth/types';
-import { RoleType as Role } from '../permission/types';
+import { User } from '@/shared/auth/types';
+import { RoleType } from '@/shared/permission/types';
 
-export { Role };
+export { RoleType as Role };
 
 export interface ProfileFormData {
   name: string;
@@ -22,16 +22,13 @@ export enum Plan {
   ENTERPRISE = 'ENTERPRISE',
 }
 
-export interface UserData extends BaseUser {
-  avatar?: string;
-  plan?: Plan;
-}
+export type UserData = User;
 
 export interface Team {
   name: string;
 }
 
-export interface UserProfile extends UserData {
+export interface UserProfile extends User {
   phone?: string;
   memberSince?: string;
   preferences?: {

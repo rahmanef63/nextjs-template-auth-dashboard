@@ -1,10 +1,13 @@
 import { z } from 'zod';
+import { RoleType } from '@/shared/permission/types/rbac-types';
 
 export const userSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  role: z.enum(['ADMIN', 'STAFF', 'MANAGER', 'USER']),
+  name: z.string().min(2).max(50),
+  email: z.string().email(),
+  password: z.string().min(8).max(100),
+  role: z.nativeEnum(RoleType),
+  avatarUrl: z.string().url().optional(),
+  bio: z.string().max(500).optional(),
 });
 
 export const loginSchema = z.object({

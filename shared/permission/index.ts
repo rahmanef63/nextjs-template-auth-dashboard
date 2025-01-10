@@ -1,6 +1,17 @@
-export * from './constants';
+// Export types
 export * from './types';
+
+// Export constants
+export { ROLE_HIERARCHY } from './constants';
+
+// Export functions
+export { getPermissionsForRole } from './lib';
+
+// Export hooks
 export * from './hooks';
+
+// Export components
 export * from './components';
-export * from './lib';
+
+// Export config
 export * from './config';

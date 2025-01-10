@@ -68,14 +68,15 @@ export function RoleForm({ role, onSubmit }: RoleFormProps) {
           onValueChange={(value) => setType(value as RoleType)}
           disabled={role?.isSystem}
         >
-          <SelectTrigger id="type">
-            <SelectValue placeholder="Select role type" />
+          <SelectTrigger>
+            <SelectValue placeholder="Select a role type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={RoleType.ADMIN}>Administrator</SelectItem>
-            <SelectItem value={RoleType.MANAGER}>Manager</SelectItem>
-            <SelectItem value={RoleType.STAFF}>Staff</SelectItem>
-            <SelectItem value={RoleType.CLIENT}>Client</SelectItem>
+            <SelectItem value={RoleType.SUPER_ADMIN}>Super Admin</SelectItem>
+            <SelectItem value={RoleType.ADMIN}>Admin</SelectItem>
+            <SelectItem value={RoleType.POWER_USER}>Power User</SelectItem>
+            <SelectItem value={RoleType.STANDARD}>Standard</SelectItem>
+            <SelectItem value={RoleType.RESTRICTED}>Restricted</SelectItem>
             <SelectItem value={RoleType.CUSTOM}>Custom</SelectItem>
           </SelectContent>
         </Select>

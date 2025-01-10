@@ -5,8 +5,8 @@ import { RoleType } from '@/shared/types';
 import { Permission } from '@/shared/permission/types/permission-types';
 
 // Function to get permissions for a role from the server
-async function getRolePermissions(role: RoleType): Promise<Permission[]> {
-  const response = await fetch(`/api/rbac/permissions/role/${role}`);
+async function getRolePermissions(roleType: RoleType): Promise<Permission[]> {
+  const response = await fetch(`/api/rbac/permissions/role/${roleType}`);
   if (!response.ok) {
     throw new Error('Failed to fetch role permissions');
   }
@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userRole = session.user.role;
-    const permissions = await getRolePermissions(userRole);
+    const userRoleType = session.user.roleType;
+    const permissions = await getRolePermissions(userRoleType);
     if (!permissions.includes('users:read')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }

@@ -1,10 +1,27 @@
-// This file is temporarily empty while we focus on UI/UX without permissions
-// Will be implemented later when adding back the permission system
+import { FeatureId } from '../types/navigation-types';
 
-export const NAVIGATION_PERMISSIONS = {
+// List of all feature IDs that require permissions
+export const NAVIGATION_PERMISSIONS: Record<string, FeatureId> = {
   DASHBOARD: 'dashboard',
+  PROFILE: 'profile',
+  ROLES: 'roles',
+  AUDIT: 'audit',
+  SECURITY: 'security',
+  CONFIG: 'config',
+  TEAM: 'team',
+  TEAMS: 'teams',
+  TASKS: 'tasks',
+  METRICS: 'metrics',
+  TOOLS: 'tools',
   USERS: 'users',
   SETTINGS: 'settings',
   PROJECTS: 'projects',
-  TEAMS: 'teams'
+  PROJECT_ANALYTICS: 'project-analytics',
+  PROJECT_ACTIVE: 'project-active',
+  PROJECT_ARCHIVED: 'project-archived',
+  PROJECT_LOCATIONS: 'project-locations',
+  ANALYTICS: 'analytics',
+  REPORTS: 'reports',
+  HELP: 'help',
+  SUPPORT: 'support'
 } as const;

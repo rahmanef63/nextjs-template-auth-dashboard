@@ -6,67 +6,49 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-} from "shared/components/ui/sidebar"
-import { useSidebarData } from "shared/hooks/useSidebarData"
-import { SidebarSkeleton } from "./sidebar-skeleton"
+  SidebarGroup,
+  SidebarGroupLabel,
+} from "@/shared/components/ui/sidebar"
+import { ScrollArea } from "@/shared/components/ui/scroll-area"
+import { Users } from "lucide-react"
 import { TeamSwitcher } from "./team-switcher"
-import { getSidebarData } from "./sidebar-data"
-import { useSession } from "next-auth/react"
-import { RoleType } from "shared/types"
 import { UserProfile } from "@/slices/profile/components/user-profile"
 import { SidebarNavMain } from "./sidebar-nav-main"
+import { useAuthSession } from "@/shared/hooks/use-auth-session"
+import { MenuSectionKey, MenuSections } from '@/shared/navigation/constants/menu-section';
+import { getCategorizedItems } from '@/shared/navigation/config/menu-config';
 
-interface SessionUser {
-  id: string
-  name: string | null
-  email: string
-  role: {
-    id: string
-    name: string
-    type: RoleType
-  }
-  permissions: string[]
-}
+interface SidebarProps extends React.ComponentProps<typeof Sidebar> {}
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ ...props }: SidebarProps) {
+  const { isLoading, isAuthenticated, error, userRole } = useAuthSession()
+  const categorizedItems = getCategorizedItems(userRole);
   
-  const { data: session, status } = useSession()
-  const [error, setError] = React.useState<string | null>(null)
-  const sidebarData = useSidebarData()
+  // Define the order of sections
+  const sections: MenuSectionKey[] = [
+    MenuSectionKey.OVERVIEW,
+    MenuSectionKey.FEATURES,
+    MenuSectionKey.MANAGEMENT,
+    MenuSectionKey.SETTINGS,
+    MenuSectionKey.RESOURCES,
+    MenuSectionKey.OTHER
+  ];
 
-  if (status === "loading") {
-    return <SidebarSkeleton />
-  }
-
-  if (status === "unauthenticated") {
+  if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-sm text-muted-foreground">Please sign in</p>
+        <p className="text-sm text-muted-foreground">Loading...</p>
       </div>
     )
   }
 
-  if (!session?.user) {
+  if (!isAuthenticated) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-sm text-muted-foreground">No user data available</p>
+        <p className="text-sm text-muted-foreground">{error}</p>
       </div>
     )
   }
-
-  const userData: SessionUser = {
-    id: session.user.id,
-    name: session.user.name || null,
-    email: session.user.email,
-    role: {
-      id: session.user.role.id,
-      name: session.user.role.name,
-      type: session.user.role.type as RoleType
-    },
-    permissions: session.user.permissions
-  }
-
-  const data = getSidebarData(userData)
 
   return (
     <Sidebar 
@@ -76,15 +58,32 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {...props}
     >
       <SidebarHeader className="border-b px-2 py-2">
-        <TeamSwitcher teams={[data.teams[0]]} />
+        <TeamSwitcher teams={[
+          {
+            name: "Personal Account",
+            logo: Users,
+            plan: "Free"
+          }
+        ]} />
       </SidebarHeader>
       <SidebarContent className="px-2">
-        {/* <NavMain />
-        <NavProjects projects={data.projects} /> */}
-        <SidebarNavMain role={userData.role.type} />
+        <ScrollArea className="h-full">
+          <SidebarContent>
+            {sections.map((section) => {
+              const items = categorizedItems[section];
+              return items.length > 0 && (
+                <SidebarGroup key={section}>
+                  <SidebarGroupLabel>
+                    {MenuSections[section].title}
+                  </SidebarGroupLabel>
+                  <SidebarNavMain items={items} />
+                </SidebarGroup>
+              );
+            })}
+          </SidebarContent>
+        </ScrollArea>
       </SidebarContent>
       <SidebarFooter className="border-t px-2 py-2">
-        {/* <NavUser userData={data.user} /> */}
         <UserProfile />
       </SidebarFooter>
     </Sidebar>

@@ -5,8 +5,8 @@ import {
   MenuItem,
   NavigationSection,
   NavigationStore,
-} from '../navigation/types/navigation-types';
-import { adminMenuItems, defaultMenuItems } from '../navigation/config/menu-config';
+} from '../types/navigation-types';
+import { adminMenuItems, defaultMenuItems } from '../config/menu-config';
 
 type RoleMenus = {
   [key: string]: NavigationSection[];

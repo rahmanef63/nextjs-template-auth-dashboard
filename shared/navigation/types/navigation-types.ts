@@ -1,47 +1,52 @@
-import { User } from '@/shared/auth/types';
-import { LucideIcon } from 'lucide-react';
+import { RoleType } from '@/shared/permission/types/rbac-types';
+import { TypeIcon as type, LucideIcon } from 'lucide-react'
 
 // Core feature IDs that map to our slices
-export type FeatureId = 
-  | 'dashboard'
-  | 'profile'
-  | 'roles'
-  | 'audit'
-  | 'security'
-  | 'config'
-  | 'team'
-  | 'teams'
-  | 'tasks'
-  | 'metrics'
-  | 'tools'
-  | 'users'
-  | 'settings'
-  | 'projects'
-  | 'project-analytics'
-  | 'project-active'
-  | 'project-archived'
-  | 'project-locations'
-  | 'analytics'
-  | 'reports'
-  | 'help'
-  | 'support';
+export type FeatureId = string;
 
-// Base navigation item type
-export interface NavItem {
-  id: FeatureId | string;
-  label: string;
-  path: string;
-  icon?: LucideIcon;
-  iconName?: string;
-  disabled?: boolean;
-  external?: boolean;
+export type showIcon = {
+  icon: boolean
 }
 
-// Menu item extends NavItem with additional properties
-export interface MenuItem extends NavItem {
-  roles?: string[];
-  children?: MenuItem[];
-  permission?: string;
+export interface NavMainSubItem {
+  id?: string
+  title: string
+  href?: string
+  icon?: LucideIcon
+  isVisible?: boolean
+}
+
+export interface NavMainItem {
+  id?: FeatureId | string;
+  title: string
+  href?: string 
+  icon?: LucideIcon
+  isActive?: boolean
+  isCollapsed?: boolean
+  items?: NavMainSubItem[]
+  showIcon?: boolean // Controls parent icon visibility when collapsed
+}
+
+
+export interface NavProjectItem {
+  name: string
+  href?: string
+  icon?: LucideIcon
+}
+
+
+
+// Menu item extends NavItem
+export interface MenuItem extends NavMainItem  {
+  superAdminOnly?: boolean;
+  adminOnly?: boolean;
+  powerUserOnly?: boolean;
+  standardAccess?: boolean;
+  restrictedAccess?: boolean;
+  customAccess?: boolean;
+  isActive?: boolean;
+  items?: MenuItem[];
+  external?: boolean;
 }
 
 export interface NavigationSection {
@@ -61,9 +66,8 @@ export interface BreadcrumbItem {
 }
 
 export interface NavigationConfig {
-  defaultExpanded: boolean;
-  persistState: boolean;
-  allowMultipleExpanded?: boolean;
+  sections: NavigationSection[];
+  defaultPath: string;
 }
 
 export interface NavigationItemProps {
@@ -75,16 +79,17 @@ export interface NavigationItemProps {
 export interface PageRegistryItem {
   id: FeatureId;
   component: () => Promise<{ default: React.ComponentType }>;
-  default: React.ComponentType;
   enabled: boolean;
 }
 
-export type PageRegistry = Record<FeatureId, PageRegistryItem>;
+export interface PageRegistry {
+  [key: string]: PageRegistryItem;
+}
 
 export interface NavigationStore {
-  activeRole: string;
+  activeRole: RoleType;
   pathname?: string;
-  setActiveRole: (role: string) => void;
+  setActiveRole: (role: RoleType) => void;
   getMenuForRole: () => NavigationSection[];
   canAccessRoute: (path: string) => boolean;
 }
@@ -92,7 +97,7 @@ export interface NavigationStore {
 // Navigation settings type
 export interface NavigationSettings {
   expanded: boolean;
-  activeRole: string;
+  activeRole: RoleType;
   sections: NavigationSection[];
 }
 

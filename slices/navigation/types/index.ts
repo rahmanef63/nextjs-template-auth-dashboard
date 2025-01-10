@@ -1,5 +1,6 @@
-import { FeatureId } from 'shared/navigation/types';
-import { Permission } from 'shared/permission/types/rbac-types';
+import { FeatureId } from '@/shared/navigation/types';
+import { Permission } from '@/shared/permission/types/permission-types';
+import { Role } from '@/shared/permission/types/rbac-types';
 
 export interface NavigationPermission {
   featureId: FeatureId;
@@ -10,7 +11,7 @@ export interface NavigationPermissionState {
   permissions: Record<FeatureId, Permission>;
   isLoading: boolean;
   error: string | null;
-  updatePermissions: (permissions: Record<FeatureId, Permission>) => void;
+  updatePermissions: (role: Role) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
 }

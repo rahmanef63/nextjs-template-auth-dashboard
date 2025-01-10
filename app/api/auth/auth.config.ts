@@ -30,12 +30,15 @@ export const authOptions: NextAuthOptions = {
             id: authUser.id,
             email: authUser.email,
             name: authUser.name,
+            roleType: authUser.roleType,
             role: {
               id: authUser.role.id,
               name: authUser.role.name,
               type: authUser.role.type,
-            },
-            permissions: authUser.permissions.map(p => p.name),
+              isSystem: authUser.role.isSystem,
+              createdAt: authUser.role.createdAt,
+              updatedAt: authUser.role.updatedAt
+            }
           };
 
           return user;
@@ -52,22 +55,25 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
+        token.roleType = user.roleType;
         token.role = user.role;
-        token.permissions = user.permissions;
       }
       return token;
     },
     session({ session, token }) {
-      if (token && session.user) {
+      if (session.user) {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
-        session.user.name = token.name as string;
+        session.user.name = token.name as string || '';
+        session.user.roleType = token.roleType as RoleType;
         session.user.role = {
           id: token.role.id,
           name: token.role.name,
           type: token.role.type as RoleType,
+          isSystem: token.role.isSystem,
+          createdAt: token.role.createdAt,
+          updatedAt: token.role.updatedAt
         };
-        session.user.permissions = token.permissions as string[];
       }
       return session;
     },

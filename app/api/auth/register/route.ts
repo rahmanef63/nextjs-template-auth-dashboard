@@ -21,12 +21,12 @@ export async function POST(request: Request) {
 
     // First, get the default user role
     const userRole = await prisma.role.findFirst({
-      where: { name: 'CLIENT' },
+      where: { name: 'STANDARD' },
     });
     console.log('Found role:', userRole);
 
     if (!userRole) {
-      console.log('Default CLIENT role not found');
+      console.log('Default STANDARD role not found');
       return NextResponse.json(
         { error: 'Default role not found' },
         { status: 500 }

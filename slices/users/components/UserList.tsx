@@ -7,6 +7,7 @@ import { Input } from 'shared/components/ui/input';
 import { Button } from 'shared/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { Table, TableHeader, TableRow, TableCell, TableBody } from 'shared/components/ui/table';
+import { RoleType } from 'shared/permission/types/rbac-types';
 
 export function UserList() {
   const [filters, setFilters] = useState<UserFilters>({
@@ -41,10 +42,12 @@ export function UserList() {
             <SelectValue placeholder="Select role" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Roles</SelectItem>
-            <SelectItem value="ADMIN">Admin</SelectItem>
-            <SelectItem value="MANAGER">Manager</SelectItem>
-            <SelectItem value="STAFF">Staff</SelectItem>
+            <SelectItem value={RoleType.SUPER_ADMIN}>Super Admin</SelectItem>
+            <SelectItem value={RoleType.ADMIN}>Admin</SelectItem>
+            <SelectItem value={RoleType.POWER_USER}>Power User</SelectItem>
+            <SelectItem value={RoleType.STANDARD}>Standard</SelectItem>
+            <SelectItem value={RoleType.RESTRICTED}>Restricted</SelectItem>
+            <SelectItem value={RoleType.CUSTOM}>Custom</SelectItem>
           </SelectContent>
         </Select>
       </div>

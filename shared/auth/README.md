@@ -1,116 +1,138 @@
 # Authentication Module (`/shared/auth`)
 
 ## Overview
-The authentication module provides a complete authentication solution for Next.js applications, implementing secure user authentication, authorization, and session management features.
+The authentication module provides a complete authentication solution for Next.js applications using NextAuth.js, implementing secure user authentication, authorization, and session management features with TypeScript support.
 
 ## Directory Structure and File Descriptions
 
 ### Root Files
 - `index.ts` - Main entry point that exports all public authentication APIs
-- `README.md` - Comprehensive module documentation
+- `README.md` - Module documentation
 
 ### `/components`
 Authentication-related React components:
-- `LoginForm.tsx` - Handles user login with email/password, includes validation and error handling
-- `RegisterForm.tsx` - Manages user registration process with form validation
+- `LoginForm.tsx` - Handles user login with email/password
+- `RegisterForm.tsx` - Manages user registration process
 
 ### `/constants`
 Configuration and constant definitions:
 - `endpoints.ts` - Authentication API endpoint configurations
 - `index.ts` - Exports all constants
-- `roles.ts` - User role definitions and associated permissions
+- `roles.ts` - User role definitions and permissions
 
 ### `/context`
 React Context implementation for auth state:
-- `auth-context.ts` - TypeScript interfaces for auth context
-- `auth-context.tsx` - Core authentication context implementation
-- `index.ts` - Exports context components and hooks
+- `auth-context.tsx` - Core authentication context implementation with TypeScript types
+- `index.ts` - Re-exports context components
 
 ### `/guards`
 Route protection and authorization:
-- `auth-guard.tsx` - Higher-order component for protecting routes based on authentication status and user roles
+- `auth-guard.tsx` - Route protection based on authentication status and user roles
 
 ### `/hooks`
 Custom React hooks:
-- `use-auth.ts` - Custom hook providing access to authentication state and methods
+- `use-auth.ts` - Hook for accessing authentication state and methods
 
 ### `/lib`
 Core authentication utilities:
-- `api.ts` - Authentication API integration utilities
-- `session.ts` - Session management and persistence
-- `token.ts` - JWT token handling, storage, and validation
+- `api.ts` - Authentication API integration
+- `session.ts` - Session management
+- `token.ts` - JWT token handling
 
 ### `/providers`
 Context providers:
-- `auth-provider.tsx` - Authentication provider component with state management
+- `auth-provider.tsx` - NextAuth.js provider integration with session management
 
 ### `/services`
 Authentication business logic:
-- `authService.ts` - Core service handling authentication operations and API calls
+- `authService.ts` - Core authentication operations
 
 ### `/types`
-TypeScript type definitions:
-- `auth-types.ts` - Core authentication type definitions
-- `index.ts` - Type exports
-- `next-auth.d.ts` - NextAuth.js type declarations
-- `session.ts` - Session-related interfaces and types
+Type definitions:
+- `auth-types.ts` - Base user and authentication types
+- `next-auth.d.ts` - NextAuth.js type extensions
+- `session.ts` - Session type definitions
+
+## Usage
+
+### Setup
+
+1. Wrap your app with auth providers:
+```tsx
+// app/layout.tsx
+import { NextAuthProvider } from '@/shared/auth';
+
+export default function RootLayout({ children }) {
+  return (
+    <NextAuthProvider>
+      {children}
+    </NextAuthProvider>
+  );
+}
+```
+
+2. Use authentication in components:
+```tsx
+import { useAuthContext } from '@/shared/auth';
+
+function MyComponent() {
+  const { user, login, logout, loading } = useAuthContext();
+  
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <div>Not authenticated</div>;
+  
+  return (
+    <div>
+      Welcome {user.name}
+      <button onClick={logout}>Logout</button>
+    </div>
+  );
+}
+```
+
+3. Protect routes with auth guard:
+```tsx
+import { AuthGuard } from '@/shared/auth';
+
+function ProtectedPage() {
+  return (
+    <AuthGuard>
+      <YourProtectedComponent />
+    </AuthGuard>
+  );
+}
+```
 
 ## Key Features
 
-1. **Authentication Flow**
-   - Email/password authentication
-   - JWT token management
-   - Secure session handling
-   - Role-based authorization
+- NextAuth.js Integration with Type Safety
+- Role-based Access Control (RBAC)
+- Type-safe Authentication Context
+- Protected Route Guards
+- Session Management
+- JWT Token Handling
 
-2. **State Management**
-   - Centralized authentication state
-   - Persistent session management
-   - Secure token storage
-   - Real-time auth status updates
+## Type System
 
-3. **Security Features**
-   - JWT token validation
-   - Role-based access control (RBAC)
-   - Protected route guards
-   - Secure credential handling
-
-## Best Practices
-
-1. **Security**
-   - HTTP-only cookies for token storage
-   - Secure headers implementation
-   - Proper token validation
-   - XSS protection measures
-
-2. **Error Handling**
-   - Comprehensive error states
-   - User-friendly error messages
-   - Session expiration handling
-   - Automatic token refresh
-
-3. **Type Safety**
-   - Strict TypeScript implementation
-   - Comprehensive type definitions
-   - Type guard utilities
-   - Zero any usage policy
-
-## Usage Example
+The module uses a comprehensive type system:
 
 ```typescript
-// Using the authentication hook
-import { useAuth } from '@/shared/auth/hooks/use-auth';
+// Base User Type
+interface User {
+  id: string;
+  email: string;
+  name?: string;
+  avatar?: string;
+  role: Role;
+  roleType: RoleType;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-function MyComponent() {
-  const { user, login, logout } = useAuth();
-
-  return (
-    <div>
-      {user ? (
-        <button onClick={logout}>Logout</button>
-      ) : (
-        <button onClick={() => login(credentials)}>Login</button>
-      )}
-    </div>
-  );
+// Auth Context Type
+interface AuthContextType {
+  user: User | null;
+  login: () => void;
+  logout: () => void;
+  loading: boolean;
 }

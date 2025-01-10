@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useNavigation } from "./use-navigation";
+import { useNavigation } from "../navigation/hooks/use-navigation";
 
 export const useProjectRoutes = () => {
   const router = useRouter();

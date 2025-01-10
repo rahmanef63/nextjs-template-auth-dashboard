@@ -1,5 +1,7 @@
 import { MenuItem } from '../types';
-import { defaultAdminMenuItems, defaultManagerMenuItems, defaultStaffMenuItems, defaultSupportMenuItems } from '../config/default-menu';
+import { adminItems, managementItems, operationalItems, generalItems } from '../config/menu-config';
+import { RoleType } from '@/shared/permission/types/rbac-types';
+import { MenuSection } from '../constants/menu-section';
 
 /**
  * Menu Manager Class
@@ -7,7 +9,7 @@ import { defaultAdminMenuItems, defaultManagerMenuItems, defaultStaffMenuItems, 
  */
 export class MenuManager {
   private static instance: MenuManager;
-  private customMenuItems: Map<string, MenuItem[]>;
+  private customMenuItems: Map<RoleType, MenuItem[]>;
 
   private constructor() {
     this.customMenuItems = new Map();
@@ -22,84 +24,81 @@ export class MenuManager {
   }
 
   private initializeDefaultMenus() {
-    this.customMenuItems.set('admin', [...defaultAdminMenuItems]);
-    this.customMenuItems.set('manager', [...defaultManagerMenuItems]);
-    this.customMenuItems.set('staff', [...defaultStaffMenuItems]);
-    this.customMenuItems.set('support', [...defaultSupportMenuItems]);
+    // Initialize admin menus with all sections
+    const allMenus = [
+      ...(adminItems || []),
+      ...(managementItems || []),
+      ...(operationalItems || []),
+      ...(generalItems || [])
+    ];
+
+    // Super admin and admin get all menus
+    this.customMenuItems.set(RoleType.SUPER_ADMIN, allMenus);
+    this.customMenuItems.set(RoleType.ADMIN, allMenus);
+
+    // Power users get management, operational and general items
+    this.customMenuItems.set(RoleType.POWER_USER, [
+      ...(managementItems || []),
+      ...(operationalItems || []),
+      ...(generalItems || [])
+    ]);
+
+    // Standard users get operational and general items
+    this.customMenuItems.set(RoleType.STANDARD, [
+      ...(operationalItems || []),
+      ...(generalItems || [])
+    ]);
+
+    // Restricted users only get general items
+    this.customMenuItems.set(RoleType.RESTRICTED, [
+      ...(generalItems || [])
+    ]);
+
+    // Custom roles start with general items
+    this.customMenuItems.set(RoleType.CUSTOM, [
+      ...(generalItems || [])
+    ]);
   }
 
   /**
    * Get menu items for a specific role
    */
-  public getMenuItems(role: string): MenuItem[] {
+  public getMenuItems(role: RoleType): MenuItem[] {
+    // Super admin and admin get all menus
+    if (role === RoleType.SUPER_ADMIN || role === RoleType.ADMIN) {
+      return [
+        ...(adminItems || []),
+        ...(managementItems || []),
+        ...(operationalItems || []),
+        ...(generalItems || [])
+      ];
+    }
+
     return this.customMenuItems.get(role) || [];
   }
 
   /**
-   * Add a new menu item to a role
+   * Add custom menu items for a role
    */
-  public addMenuItem(role: string, item: MenuItem): void {
-    const items = this.customMenuItems.get(role) || [];
-    if (!items.find(existing => existing.id === item.id)) {
-      items.push(item);
-      this.customMenuItems.set(role, items);
-    }
+  public addMenuItems(role: RoleType, items: MenuItem[]): void {
+    const existingItems = this.customMenuItems.get(role) || [];
+    this.customMenuItems.set(role, [...existingItems, ...items]);
   }
 
   /**
-   * Update an existing menu item
+   * Remove menu items for a role
    */
-  public updateMenuItem(role: string, itemId: string, updates: Partial<MenuItem>): boolean {
-    const items = this.customMenuItems.get(role);
-    if (!items) return false;
-
-    const index = items.findIndex(item => item.id === itemId);
-    if (index === -1) return false;
-
-    items[index] = { ...items[index], ...updates };
-    this.customMenuItems.set(role, items);
-    return true;
+  public removeMenuItems(role: RoleType, itemIds: string[]): void {
+    const existingItems = this.customMenuItems.get(role) || [];
+    const filteredItems = existingItems.filter(item => !itemIds.includes(item.id));
+    this.customMenuItems.set(role, filteredItems);
   }
 
   /**
-   * Remove a menu item
+   * Clear all menu items for a role
    */
-  public removeMenuItem(role: string, itemId: string): boolean {
-    const items = this.customMenuItems.get(role);
-    if (!items) return false;
-
-    const filtered = items.filter(item => item.id !== itemId);
-    if (filtered.length === items.length) return false;
-
-    this.customMenuItems.set(role, filtered);
-    return true;
-  }
-
-  /**
-   * Reset menu items for a role to defaults
-   */
-  public resetToDefault(role: string): void {
-    switch (role) {
-      case 'admin':
-        this.customMenuItems.set('admin', [...defaultAdminMenuItems]);
-        break;
-      case 'manager':
-        this.customMenuItems.set('manager', [...defaultManagerMenuItems]);
-        break;
-      case 'staff':
-        this.customMenuItems.set('staff', [...defaultStaffMenuItems]);
-        break;
-      case 'support':
-        this.customMenuItems.set('support', [...defaultSupportMenuItems]);
-        break;
-    }
-  }
-
-  /**
-   * Reset all menus to their defaults
-   */
-  public resetAllToDefault(): void {
-    this.initializeDefaultMenus();
+  public clearMenuItems(role: RoleType): void {
+    this.customMenuItems.delete(role);
   }
 }
 

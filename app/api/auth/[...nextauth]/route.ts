@@ -43,7 +43,6 @@ const authOptions: AuthOptions = {
         token.email = user.email;
         token.name = user.name;
         token.role = user.role;
-        token.permissions = user.permissions;
       }
       return token;
     },
@@ -51,9 +50,8 @@ const authOptions: AuthOptions = {
       if (session.user) {
         session.user.id = token.sub ?? '';
         session.user.email = token.email ?? '';
-        session.user.name = token.name ?? '';
-        session.user.role = token.role ?? 'user';
-        session.user.permissions = token.permissions ?? [];
+        session.user.name = token.name;
+        session.user.role = token.role;
       }
       return session;
     },

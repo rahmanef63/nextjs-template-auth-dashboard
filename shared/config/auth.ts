@@ -32,8 +32,13 @@ export const authConfig: NextAuthOptions = {
               id: user.role.id,
               name: user.role.name,
               type: user.role.type,
+              isSystem: user.role.isSystem,
+              createdAt: user.role.createdAt,
+              updatedAt: user.role.updatedAt
             },
-            permissions: user.permissions.map(p => p.name),
+            roleType: user.roleType,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
           };
         } catch (error) {
           console.error("Authentication error:", error);
@@ -49,17 +54,17 @@ export const authConfig: NextAuthOptions = {
         token.email = user.email;
         token.name = user.name;
         token.role = user.role;
-        token.permissions = user.permissions;
+        token.roleType = user.roleType;
       }
       return token;
     },
     session({ session, token }) {
-      if (token && session.user) {
+      if (session.user) {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
-        session.user.name = token.name as string;
-        session.user.role = token.role as RoleType;
-        session.user.permissions = token.permissions as string[];
+        session.user.name = token.name as string || '';
+        session.user.role = token.role;
+        session.user.roleType = token.roleType as RoleType;
       }
       return session;
     },

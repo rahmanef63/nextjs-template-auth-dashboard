@@ -1,9 +1,10 @@
 import { prisma } from 'shared/config/database';
 import bcrypt from 'bcryptjs';
 import type { User } from 'next-auth';
-import { Permission, RoleType, Role } from 'shared/permission/types/rbac-types';
+import { RoleType, Role } from 'shared/permission/types/rbac-types';
+import { Permission } from 'shared/permission/types/permission-types';
 import type { User as PrismaUser, Role as PrismaRole, Permission as PrismaPermission } from '@prisma/client';
-import type { IUser } from '../types/next-auth';
+import type { User as AppUser } from '../types/auth-types';
 
 type PrismaRoleWithPermissions = PrismaRole & {
   permissions: PrismaPermission[];
@@ -24,7 +25,7 @@ export type RegisterData = {
   roleId?: string;
 };
 
-export async function authenticateUser(email: string, password: string): Promise<IUser | null> {
+export async function authenticateUser(email: string, password: string): Promise<AppUser | null> {
   const user = await prisma.user.findUnique({
     where: { email },
     include: {
@@ -44,11 +45,18 @@ export async function authenticateUser(email: string, password: string): Promise
     id: user.role.id,
     name: user.role.name,
     type: user.role.type as RoleType,
-    description: user.role.description || '',
-    isSystem: user.role.isSystem || false,
-    permissions: user.role.permissions.map(p => p.name as Permission),
-    createdAt: user.role.createdAt.toISOString(),
-    updatedAt: user.role.updatedAt.toISOString()
+    description: user.role.description,
+    isSystem: user.role.isSystem,
+    permissions: user.role.permissions.map(p => ({
+      id: p.id,
+      name: p.name,
+      resource: p.resource,
+      action: p.action,
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt
+    })),
+    createdAt: user.role.createdAt,
+    updatedAt: user.role.updatedAt
   };
 
   return {
@@ -56,43 +64,35 @@ export async function authenticateUser(email: string, password: string): Promise
     email: user.email,
     name: user.name || '',
     role,
-    permissions: role.permissions
-  } as IUser;
+    roleType: user.role.type as RoleType,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt
+  };
 }
 
-export async function registerUser(data: RegisterData): Promise<IUser> {
-  const existingUser = await prisma.user.findUnique({
-    where: { email: data.email },
-  });
-
-  if (existingUser) {
-    throw new Error('User already exists');
-  }
-
+export async function registerUser(data: RegisterData): Promise<AppUser> {
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
-  // Get default role if not specified
-  const defaultRole = await prisma.role.findFirst({
-    where: { type: 'CUSTOM' },
-    include: {
-      permissions: true
-    }
-  }) as PrismaRoleWithPermissions | null;
+  // If no roleId provided, get the STANDARD role
+  if (!data.roleId) {
+    const standardRole = await prisma.role.findFirst({
+      where: { type: 'STANDARD' },
+      include: { permissions: true }
+    });
 
-  if (!defaultRole) {
-    throw new Error('Default role not found');
+    if (!standardRole) {
+      throw new Error('Default role not found');
+    }
+
+    data.roleId = standardRole.id;
   }
 
-  const user: PrismaUserWithRole = await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       email: data.email,
       password: hashedPassword,
       name: data.name,
-      role: {
-        connect: {
-          id: data.roleId || defaultRole.id,
-        },
-      },
+      roleId: data.roleId,
     },
     include: {
       role: {
@@ -100,18 +100,25 @@ export async function registerUser(data: RegisterData): Promise<IUser> {
           permissions: true
         }
       }
-    },
+    }
   }) as PrismaUserWithRole;
 
   const role: Role = {
     id: user.role.id,
     name: user.role.name,
     type: user.role.type as RoleType,
-    description: user.role.description || '',
-    isSystem: user.role.isSystem || false,
-    permissions: user.role.permissions.map(p => p.name as Permission),
-    createdAt: user.role.createdAt.toISOString(),
-    updatedAt: user.role.updatedAt.toISOString()
+    description: user.role.description,
+    isSystem: user.role.isSystem,
+    permissions: user.role.permissions.map(p => ({
+      id: p.id,
+      name: p.name,
+      resource: p.resource,
+      action: p.action,
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt
+    })),
+    createdAt: user.role.createdAt,
+    updatedAt: user.role.updatedAt
   };
 
   return {
@@ -119,6 +126,8 @@ export async function registerUser(data: RegisterData): Promise<IUser> {
     email: user.email,
     name: user.name || '',
     role,
-    permissions: role.permissions
-  } as IUser;
+    roleType: user.role.type as RoleType,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt
+  };
 }

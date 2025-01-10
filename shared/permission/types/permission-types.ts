@@ -1,75 +1,70 @@
+// Basic CRUD actions that apply to any resource
 export enum PermissionAction {
   READ = 'read',
-  WRITE = 'write',
-  MANAGE = 'manage',
+  CREATE = 'create',
+  UPDATE = 'update',
   DELETE = 'delete',
-  CREATE = 'create'
+  MANAGE = 'manage'
 }
 
+// Resource types
 export enum PermissionResource {
-  DASHBOARD = 'dashboard',
+  ALL = 'all',
   USERS = 'users',
-  SETTINGS = 'settings',
-  TEAMS = 'teams',
-  PROJECTS = 'projects',
-  BILLING = 'billing',
   ROLES = 'roles',
-  AUDIT = 'audit',
-  ANALYTICS = 'analytics'
+  SETTINGS = 'settings'
 }
 
-export type Permission = `${PermissionResource}:${PermissionAction}`;
+// Permission format: "resource:action"
+export type PermissionString = `${string}:${PermissionAction}`;
 
+// Database Permission model
+export interface Permission {
+  id: string;
+  name: string;
+  resource: string;
+  action: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Define common permissions
 export const PERMISSIONS = {
-  DASHBOARD: {
-    READ: `${PermissionResource.DASHBOARD}:${PermissionAction.READ}` as Permission,
-    WRITE: `${PermissionResource.DASHBOARD}:${PermissionAction.WRITE}` as Permission,
-    MANAGE: `${PermissionResource.DASHBOARD}:${PermissionAction.MANAGE}` as Permission
+  ALL: {
+    READ: 'all:read' as PermissionString,
+    CREATE: 'all:create' as PermissionString,
+    UPDATE: 'all:update' as PermissionString,
+    DELETE: 'all:delete' as PermissionString,
+    MANAGE: 'all:manage' as PermissionString
   },
   USERS: {
-    READ: `${PermissionResource.USERS}:${PermissionAction.READ}` as Permission,
-    WRITE: `${PermissionResource.USERS}:${PermissionAction.WRITE}` as Permission,
-    MANAGE: `${PermissionResource.USERS}:${PermissionAction.MANAGE}` as Permission,
-    DELETE: `${PermissionResource.USERS}:${PermissionAction.DELETE}` as Permission,
-    CREATE: `${PermissionResource.USERS}:${PermissionAction.CREATE}` as Permission
-  },
-  SETTINGS: {
-    READ: `${PermissionResource.SETTINGS}:${PermissionAction.READ}` as Permission,
-    WRITE: `${PermissionResource.SETTINGS}:${PermissionAction.WRITE}` as Permission,
-    MANAGE: `${PermissionResource.SETTINGS}:${PermissionAction.MANAGE}` as Permission
-  },
-  TEAMS: {
-    READ: `${PermissionResource.TEAMS}:${PermissionAction.READ}` as Permission,
-    WRITE: `${PermissionResource.TEAMS}:${PermissionAction.WRITE}` as Permission,
-    MANAGE: `${PermissionResource.TEAMS}:${PermissionAction.MANAGE}` as Permission,
-    DELETE: `${PermissionResource.TEAMS}:${PermissionAction.DELETE}` as Permission,
-    CREATE: `${PermissionResource.TEAMS}:${PermissionAction.CREATE}` as Permission
-  },
-  PROJECTS: {
-    READ: `${PermissionResource.PROJECTS}:${PermissionAction.READ}` as Permission,
-    WRITE: `${PermissionResource.PROJECTS}:${PermissionAction.WRITE}` as Permission,
-    MANAGE: `${PermissionResource.PROJECTS}:${PermissionAction.MANAGE}` as Permission
-  },
-  BILLING: {
-    READ: `${PermissionResource.BILLING}:${PermissionAction.READ}` as Permission,
-    WRITE: `${PermissionResource.BILLING}:${PermissionAction.WRITE}` as Permission,
-    MANAGE: `${PermissionResource.BILLING}:${PermissionAction.MANAGE}` as Permission
+    READ: 'users:read' as PermissionString,
+    CREATE: 'users:create' as PermissionString,
+    UPDATE: 'users:update' as PermissionString,
+    DELETE: 'users:delete' as PermissionString,
+    MANAGE: 'users:manage' as PermissionString
   },
   ROLES: {
-    READ: `${PermissionResource.ROLES}:${PermissionAction.READ}` as Permission,
-    WRITE: `${PermissionResource.ROLES}:${PermissionAction.WRITE}` as Permission,
-    MANAGE: `${PermissionResource.ROLES}:${PermissionAction.MANAGE}` as Permission,
-    DELETE: `${PermissionResource.ROLES}:${PermissionAction.DELETE}` as Permission,
-    CREATE: `${PermissionResource.ROLES}:${PermissionAction.CREATE}` as Permission
+    READ: 'roles:read' as PermissionString,
+    CREATE: 'roles:create' as PermissionString,
+    UPDATE: 'roles:update' as PermissionString,
+    DELETE: 'roles:delete' as PermissionString,
+    MANAGE: 'roles:manage' as PermissionString
   },
-  AUDIT: {
-    READ: `${PermissionResource.AUDIT}:${PermissionAction.READ}` as Permission,
-    WRITE: `${PermissionResource.AUDIT}:${PermissionAction.WRITE}` as Permission,
-    MANAGE: `${PermissionResource.AUDIT}:${PermissionAction.MANAGE}` as Permission
-  },
-  ANALYTICS: {
-    READ: `${PermissionResource.ANALYTICS}:${PermissionAction.READ}` as Permission,
-    WRITE: `${PermissionResource.ANALYTICS}:${PermissionAction.WRITE}` as Permission,
-    MANAGE: `${PermissionResource.ANALYTICS}:${PermissionAction.MANAGE}` as Permission
+  SETTINGS: {
+    READ: 'settings:read' as PermissionString,
+    UPDATE: 'settings:update' as PermissionString,
+    MANAGE: 'settings:manage' as PermissionString
   }
 } as const;
+
+// Helper to create a permission string
+export const createPermission = (resource: string, action: PermissionAction): PermissionString => {
+  return `${resource}:${action}` as PermissionString;
+};
+
+// Helper to parse a permission string
+export const parsePermission = (permission: PermissionString): { resource: string; action: PermissionAction } => {
+  const [resource, action] = permission.split(':') as [string, PermissionAction];
+  return { resource, action };
+};

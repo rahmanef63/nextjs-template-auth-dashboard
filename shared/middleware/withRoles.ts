@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { Permission } from 'shared/permission/types/permission-types'
-import { rolePermissions } from 'shared/permission/lib/permission-utils'
 import { RoleType } from 'shared/permission/types/rbac-types'
+import { ROLE_PERMISSIONS } from 'shared/permission/config/role-permissions'
 
 export function withRoles(requiredPermissions: Permission[]) {
   return async function (req: NextRequest) {
@@ -16,14 +16,14 @@ export function withRoles(requiredPermissions: Permission[]) {
     }
 
     const roleName = token.role?.name?.toUpperCase() as RoleType
-    if (!roleName || !(roleName in rolePermissions)) {
+    if (!roleName || !(roleName in ROLE_PERMISSIONS)) {
       return NextResponse.json(
         { error: 'Invalid role' },
         { status: 403 }
       )
     }
 
-    const userPermissions = rolePermissions[roleName]
+    const userPermissions = ROLE_PERMISSIONS[roleName]
     const hasPermission = requiredPermissions.every(
       permission => userPermissions.includes(permission)
     )

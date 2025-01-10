@@ -17,7 +17,7 @@ export async function PUT(request: NextRequest) {
         userId: session.user.id,
       },
       data: {
-        read: true,
+        isRead: true,
       },
     });
 

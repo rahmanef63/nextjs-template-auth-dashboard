@@ -3,49 +3,70 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import type { Session } from 'next-auth';
 import type { User } from '../types/auth-types';
 
 export interface AuthContextType {
-  session: Session | null;
   user: User | null;
-  login: (newSession: Session) => void;
+  login: () => void;
   logout: () => void;
-  loading?: boolean;
+  loading: boolean;
 }
 
 export const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+// Export hook for easy context usage
+export const useAuthContext = () => {
+  const context = React.useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuthContext must be used within an AuthProvider');
+  }
+  return context;
+};
+
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = React.useState(true);
+  const [user, setUser] = React.useState<User | null>(null);
   const router = useRouter();
   const { data: session, status } = useSession();
 
   React.useEffect(() => {
-    setLoading(status === 'loading');
-  }, [status]);
+    if (status === 'loading') {
+      setLoading(true);
+    } else if (status === 'authenticated' && session?.user) {
+      const sessionUser = session.user;
+      const fullUser: User = {
+        id: sessionUser.id,
+        email: sessionUser.email || '',
+        name: sessionUser.name || '',
+        role: sessionUser.role,
+        roleType: sessionUser.roleType,
+        avatar: sessionUser.image ?? undefined,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      setUser(fullUser);
+      setLoading(false);
+    } else {
+      setUser(null);
+      setLoading(false);
+    }
+  }, [status, session]);
 
-  const login = (newSession: Session) => {
+  const login = () => {
     router.push('/dashboard');
   };
 
   const logout = () => {
-    signOut({ redirect: false });
-    router.push('/login');
+    signOut({ callbackUrl: '/login' });
   };
 
   return (
     <AuthContext.Provider value={{
-      session,
-      user: session?.user ? {
-        id: session.user.id,
-        email: session.user.email || '',
-        name: session.user.name || null,
-        role: session.user.role,
-        avatar: session.user.image || undefined,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      } : null,
+      user,
       login,
       logout,
       loading
@@ -53,4 +74,4 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}

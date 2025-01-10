@@ -1,165 +1,90 @@
-import {
-  Cog, Shield, Users, Activity, AlertTriangle,
-  LayoutDashboard, UserCog, Package, BarChart3,
-  DollarSign, Kanban, FileText, Wrench, Clock,
-  BookOpen, HelpCircle, LifeBuoy, Lock, Settings
-} from 'lucide-react';
-import { MenuItem } from '../types/navigation-types';
+import { MenuItem } from '@/shared/navigation/types/navigation-types';
+import { auditConfig } from '@/slices/audit';
+import { SliceConfig } from '@/slices/types';
+import { MenuSectionKey, MenuSections } from '@/shared/navigation/constants/menu-section';
+import { RoleType } from '@/shared/permission/types/rbac-types';
 
-// Core administrative menu items
-export const adminMenuItems: MenuItem[] = [
-  { 
-    id: 'config', 
-    icon: Cog, 
-    label: 'Global Config', 
-    path: '/dashboard/config' 
-  },
-  { 
-    id: 'security', 
-    icon: Shield, 
-    label: 'Security Settings', 
-    path: '/dashboard/security' 
-  },
-  { 
-    id: 'users', 
-    icon: Users, 
-    label: 'User Management', 
-    path: '/dashboard/users' 
-  },
-  { 
-    id: 'roles', 
-    icon: Shield, 
-    label: 'Role Management', 
-    path: '/dashboard/roles' 
-  },
-  { 
-    id: 'audit', 
-    icon: Activity, 
-    label: 'Audit System', 
-    path: '/dashboard/audit' 
-  },
-  { 
-    id: 'emergency', 
-    icon: AlertTriangle, 
-    label: 'Emergency Controls', 
-    path: '/dashboard/emergency' 
-  },
-  { 
-    id: 'navigation', 
-    icon: Settings, 
-    label: 'Navigation Settings', 
-    path: '/dashboard/navigation' 
-  },
+// Registry of all slice configurations
+const sliceConfigs: SliceConfig[] = [
+  auditConfig
 ];
 
-// Management menu items
-export const managementMenuItems: MenuItem[] = [
-  { 
-    id: 'department', 
-    icon: LayoutDashboard, 
-    label: 'Department Dashboard', 
-    path: '/dashboard/department' 
-  },
-  { 
-    id: 'team', 
-    icon: UserCog, 
-    label: 'Team Management', 
-    path: '/dashboard/team' 
-  },
-  { 
-    id: 'resources', 
-    icon: Package, 
-    label: 'Resource Control', 
-    path: '/dashboard/resources' 
-  },
-  { 
-    id: 'metrics', 
-    icon: BarChart3, 
-    label: 'Performance Metrics', 
-    path: '/dashboard/metrics' 
-  },
-  { 
-    id: 'budget', 
-    icon: DollarSign, 
-    label: 'Budget Management', 
-    path: '/dashboard/budget' 
-  },
-];
+// Menu section mapping based on role access
+const menuSectionMapping: Record<string, MenuSectionKey> = {
+  dashboard: MenuSectionKey.OVERVIEW,
+  playground: MenuSectionKey.FEATURES,
+  models: MenuSectionKey.FEATURES,
+  audit: MenuSectionKey.MANAGEMENT,
+  'design-engineering': MenuSectionKey.FEATURES,
+  'sales-marketing': MenuSectionKey.FEATURES,
+  travel: MenuSectionKey.FEATURES,
+  documentation: MenuSectionKey.RESOURCES,
+  settings: MenuSectionKey.SETTINGS
+};
 
-// Staff menu items
-export const staffMenuItems: MenuItem[] = [
-  { 
-    id: 'tasks', 
-    icon: Kanban, 
-    label: 'Task Board', 
-    path: '/dashboard/tasks' },
-  { 
-    id: 'collaboration', 
-    icon: Users, 
-    label: 'Team Collaboration', 
-    path: '/dashboard/collaboration' 
-  },
-  { 
-    id: 'documents', 
-    icon: FileText, 
-    label: 'Document Management', 
-    path: '/dashboard/documents' },
-  { 
-    id: 'tools', 
-    icon: Wrench, 
-    label: 'Project Tools', 
-    path: '/dashboard/tools' 
-  },
-  { 
-    id: 'time', 
-    icon: Clock, 
-    label: 'Time Management', 
-    path: '/dashboard/time' 
-  },
-];
+// Helper to determine menu section based on item properties and mapping
+function getMenuSection(item: MenuItem): MenuSectionKey {
+  // Check explicit section mapping
+  if (item.id && menuSectionMapping[item.id]) {
+    return menuSectionMapping[item.id];
+  }
 
-// Guest menu items
-export const guestMenuItems: MenuItem[] = [
-  { 
-    id: 'knowledge', 
-    icon: BookOpen, 
-    label: 'Knowledge Base', 
-    path: '/dashboard/knowledge' 
-  },
-  { 
-    id: 'support', 
-    icon: LifeBuoy, 
-    label: 'Support Access', 
-    path: '/dashboard/support' 
-  },
-  { 
-    id: 'features', 
-    icon: Lock, 
-    label: 'Limited Features', 
-    path: '/dashboard/features' 
-  },
-];
+  // Default to Other section if no mapping found
+  return MenuSectionKey.OTHER;
+}
 
-// Default menu items that are always shown
-export const defaultMenuItems: MenuItem[] = [
-  { 
-    id: 'dashboard', 
-    icon: LayoutDashboard, 
-    label: 'Dashboard', 
-    path: '/dashboard' 
-  },
-  { 
-    id: 'profile', 
-    icon: UserCog, 
-    label: 'Profile', 
-    path: '/dashboard/profile' 
-  },
-];
+// Helper to check if user has access to menu item
+function hasMenuAccess(item: MenuItem, userRole: RoleType): boolean {
+  // Check role-specific access in order of privilege
+  switch (userRole) {
+    case RoleType.SUPER_ADMIN:
+      return true;
+    case RoleType.ADMIN:
+      return !item.superAdminOnly;
+    case RoleType.POWER_USER:
+      return !item.superAdminOnly && !item.adminOnly;
+    case RoleType.STANDARD:
+      return !item.superAdminOnly && !item.adminOnly && !item.powerUserOnly;
+    case RoleType.RESTRICTED:
+      return item.standardAccess === true;
+    default:
+      return false;
+  }
+}
 
-export const MENU_ITEMS: MenuItem[] = [
-  ...defaultMenuItems,
-  ...adminMenuItems,
-  ...managementMenuItems,
-  ...staffMenuItems,
-  ...guestMenuItems,
-];
+// Helper to categorize menu items
+function categorizeMenuItems(items: MenuItem[], userRole: RoleType): Record<MenuSectionKey, MenuItem[]> {
+  const categories: Record<MenuSectionKey, MenuItem[]> = {
+    [MenuSectionKey.OVERVIEW]: [],
+    [MenuSectionKey.FEATURES]: [],
+    [MenuSectionKey.MANAGEMENT]: [],
+    [MenuSectionKey.SETTINGS]: [],
+    [MenuSectionKey.RESOURCES]: [],
+    [MenuSectionKey.OTHER]: []
+  };
+
+  items.forEach(item => {
+    if (hasMenuAccess(item, userRole)) {
+      const section = getMenuSection(item);
+      categories[section].push(item);
+    }
+  });
+
+  return categories;
+}
+
+// Get all menu items
+const allMenuItems = sliceConfigs.flatMap(slice => slice.navigation || []);
+
+// Function to get categorized items for a role
+function getCategorizedItems(userRole: RoleType) {
+  return categorizeMenuItems(allMenuItems, userRole);
+}
+
+// Export categorized items for admin by default
+const defaultCategories = categorizeMenuItems(allMenuItems, RoleType.ADMIN);
+
+// Export items by section with metadata
+export const menuItems = allMenuItems;
+export const categorizedItems = defaultCategories;
+export { getCategorizedItems, MenuSections };

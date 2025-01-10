@@ -2,8 +2,14 @@ import { AuthOptions, Session } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { authenticateUser } from 'shared/auth/services/authService';
-import type { User } from 'next-auth';
+import { User as AppUser } from '@/shared/auth/types/auth-types';
 import { RoleType } from 'shared/permission/types/rbac-types';
+
+interface CustomUser extends AppUser {
+  id: string;
+  role: AppUser['role'];
+  roleType: RoleType;
+}
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -43,15 +49,15 @@ export const authOptions: AuthOptions = {
         token.email = user.email;
         token.name = user.name;
         token.role = user.role;
-        token.permissions = user.permissions;
+        token.roleType = user.roleType;
       }
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
-        session.user.id = token.sub ?? '';
-        session.user.email = token.email ?? '';
-        session.user.name = token.name ?? '';
+        session.user.id = token.id as string;
+        session.user.role = token.role;
+        session.user.roleType = token.roleType;
       }
       return session;
     },
